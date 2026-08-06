@@ -1,0 +1,739 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Chishtia Medical Store — Multinational Health-Tech Design System
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Montserrat:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --bg-page: #f4f6f9;
+    --card-white: #ffffff;
+    --blue-deep: #003d7a;
+    --blue-mid: #0066cc;
+    --teal: #00a896;
+    --emerald: #059669;
+    --emerald-light: #10b981;
+    --gold: #f59e0b;
+    --footer-dark: #0f172a;
+    --slate-200: #e2e8f0;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --radius-card: 20px;
+    --radius-md: 12px;
+    --shadow-card: 0 15px 35px rgba(0, 102, 204, 0.04);
+    --shadow-deep: 0 20px 50px rgba(0, 61, 122, 0.08);
+    --gradient-banner: linear-gradient(135deg, #0f2744 0%, #003d7a 40%, #0066cc 70%, #00a896 100%);
+    --gradient-cta: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+/* ── Global scroll fix ────────────────────────────────────────────────────── */
+html, body {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: auto !important;
+    scroll-behavior: smooth;
+}
+
+[data-testid="stAppViewContainer"],
+[data-testid="stAppViewContainer"] > section,
+.main, .block-container {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+}
+
+/* ── Streamlit chrome reset ───────────────────────────────────────────────── */
+#MainMenu, footer, header[data-testid="stHeader"],
+[data-testid="stToolbar"], [data-testid="stDecoration"] {
+    visibility: hidden !important;
+    height: 0 !important;
+    display: none !important;
+}
+
+.stApp {
+    background: var(--bg-page) !important;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    color: var(--slate-800);
+    overflow-y: auto !important;
+}
+
+.block-container {
+    background: var(--card-white);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    padding: 2.25rem 2rem 2rem !important;
+    max-width: 760px !important;
+    margin: 1.5rem auto 0 !important;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+/* ── Branded paper watermark ───────────────────────────────────────────────── */
+.block-container::before {
+    content: 'CHISHTIA CARE CLINIC';
+    position: absolute;
+    top: 48%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-36deg);
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.8rem, 11vw, 5rem);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--blue-mid);
+    opacity: 0.02;
+    pointer-events: none;
+    z-index: 0;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.block-container > div {
+    position: relative;
+    z-index: 1;
+}
+
+/* ── Brand header with Asclepius ─────────────────────────────────────────── */
+.brand-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.1rem;
+    padding-bottom: 1.35rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--slate-200);
+}
+
+.brand-header.admin {
+    justify-content: flex-start;
+}
+
+.asclepius-logo {
+    flex-shrink: 0;
+    filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.45))
+            drop-shadow(0 0 24px rgba(0, 168, 150, 0.25));
+}
+
+.brand-text-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.brand-title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 0.92rem;
+    letter-spacing: 0.3em;
+    color: var(--slate-800);
+    text-transform: uppercase;
+    line-height: 1.3;
+}
+
+.brand-admin-note {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--blue-mid);
+}
+
+/* ── Welcome banner ────────────────────────────────────────────────────────── */
+.welcome-banner {
+    background: var(--gradient-banner);
+    border-radius: var(--radius-md);
+    padding: 1.75rem 1.5rem;
+    margin-bottom: 1.75rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-deep);
+}
+
+.welcome-banner::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.welcome-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    color: #ffffff;
+    margin: 0 0 0.55rem 0;
+    line-height: 1.45;
+    position: relative;
+    z-index: 1;
+}
+
+.welcome-sub {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.92);
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+/* ── Section typography ────────────────────────────────────────────────────── */
+.section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--slate-800);
+    margin: 0 0 0.25rem 0;
+}
+
+.section-desc {
+    font-size: 0.82rem;
+    color: var(--slate-500);
+    margin: 0 0 1rem 0;
+    line-height: 1.5;
+}
+
+/* ── Dual-language labels ────────────────────────────────────────────────────── */
+.dual-label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin: 0.85rem 0 0.4rem 0;
+}
+
+.dual-label .label-en {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--slate-700);
+}
+
+.dual-label .label-ur {
+    font-size: 0.76rem;
+    font-weight: 500;
+    color: var(--slate-500);
+    font-style: italic;
+}
+
+/* ── Form inputs ─────────────────────────────────────────────────────────────── */
+.stTextInput > div > div > input,
+.stTextArea > div > div > textarea {
+    background: #ffffff !important;
+    border: 1.5px solid var(--slate-200) !important;
+    border-radius: 10px !important;
+    padding: 0.85rem 1rem !important;
+    font-size: 0.94rem !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    color: var(--slate-800) !important;
+    transition: border-color 0.15s, box-shadow 0.15s !important;
+    min-height: 48px !important;
+}
+
+.stTextInput > div > div > input:focus,
+.stTextArea > div > div > textarea:focus {
+    border-color: var(--blue-mid) !important;
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1) !important;
+}
+
+.stTextInput > label,
+.stTextArea > label {
+    display: none !important;
+}
+
+[data-testid="stFileUploader"] {
+    background: linear-gradient(180deg, #f0fdf9, #ecfdf5) !important;
+    border: 2px dashed var(--teal) !important;
+    border-radius: var(--radius-md) !important;
+    padding: 1.1rem !important;
+}
+
+/* ── Method toggle cards ───────────────────────────────────────────────────── */
+.method-grid [data-testid="column"] {
+    padding: 0 0.3rem !important;
+}
+
+.method-grid .stButton > button {
+    width: 100% !important;
+    min-height: 104px !important;
+    padding: 0.9rem 0.65rem !important;
+    border-radius: var(--radius-md) !important;
+    border: 2px solid var(--slate-200) !important;
+    background: #ffffff !important;
+    color: var(--slate-700) !important;
+    font-size: 0.84rem !important;
+    font-weight: 600 !important;
+    line-height: 1.45 !important;
+    white-space: pre-line !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+    transition: all 0.2s ease !important;
+}
+
+.method-grid .stButton > button:hover {
+    border-color: var(--blue-mid) !important;
+    background: #f0f7ff !important;
+    transform: translateY(-2px) !important;
+}
+
+.method-grid .method-active .stButton > button {
+    border-color: var(--blue-mid) !important;
+    background: linear-gradient(180deg, #f0f7ff, #e8f4fd) !important;
+    color: var(--blue-deep) !important;
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.12) !important;
+}
+
+/* ── Primary CTA ───────────────────────────────────────────────────────────── */
+.dispatch-btn .stButton > button {
+    width: 100% !important;
+    background: var(--gradient-cta) !important;
+    color: #ffffff !important;
+    font-size: 1.05rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.06em !important;
+    padding: 1.05rem 1.5rem !important;
+    min-height: 58px !important;
+    border: none !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: 0 8px 24px rgba(5, 150, 105, 0.35) !important;
+    transition: transform 0.18s, box-shadow 0.18s !important;
+}
+
+.dispatch-btn .stButton > button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 12px 32px rgba(5, 150, 105, 0.45) !important;
+}
+
+/* ── Confirmation box ────────────────────────────────────────────────────────── */
+.confirm-box {
+    text-align: center;
+    background: linear-gradient(180deg, #ecfdf5, #d1fae5);
+    border: 1px solid #6ee7b7;
+    border-radius: var(--radius-card);
+    padding: 2rem 1.5rem;
+    margin: 1rem 0 1.5rem;
+    animation: fadeUp 0.4s ease;
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.confirm-icon {
+    width: 68px;
+    height: 68px;
+    background: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.85rem;
+    color: var(--emerald);
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.2);
+}
+
+.confirm-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #047857;
+    margin: 0 0 0.35rem;
+}
+
+.confirm-token {
+    display: inline-block;
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: 10px;
+    padding: 0.7rem 1.3rem;
+    font-size: 1.08rem;
+    font-weight: 700;
+    color: var(--blue-mid);
+    letter-spacing: 0.04em;
+    margin: 0.75rem 0;
+}
+
+.confirm-note {
+    font-size: 0.85rem;
+    color: var(--slate-500);
+    margin: 0;
+    line-height: 1.55;
+}
+
+/* ── Utility panels ──────────────────────────────────────────────────────────── */
+.utility-panel {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-md);
+    padding: 1.2rem 1.15rem;
+    margin: 1.25rem 0 0.75rem;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+}
+
+.divider-line {
+    border: none;
+    height: 1px;
+    background: var(--slate-200);
+    margin: 1.75rem 0;
+}
+
+.substitute-alert {
+    background: linear-gradient(90deg, #ecfdf5, #f0fdfa);
+    border-left: 4px solid var(--teal);
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+    margin-top: 0.75rem;
+    font-size: 0.88rem;
+    color: var(--slate-700);
+    line-height: 1.55;
+}
+
+.refill-card {
+    background: #f8fafc;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-md);
+    padding: 1.15rem;
+    margin-top: 0.5rem;
+}
+
+.refill-btn .stButton > button {
+    width: 100% !important;
+    background: linear-gradient(135deg, var(--blue-mid), var(--teal)) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    border: none !important;
+    border-radius: 10px !important;
+    min-height: 48px !important;
+}
+
+/* ── Alert messages ──────────────────────────────────────────────────────────── */
+.msg-box {
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    margin: 0.5rem 0;
+    font-size: 0.87rem;
+    line-height: 1.45;
+}
+
+.msg-error { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
+.msg-info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; }
+.msg-success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; }
+
+/* ── Executive footer ─────────────────────────────────────────────────────────── */
+.executive-footer {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    margin-top: 2.5rem;
+    background: var(--footer-dark);
+    padding: 2.75rem 1.5rem 2.25rem;
+    text-align: center;
+}
+
+.footer-owners-wrap {
+    padding-bottom: 1.75rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.footer-directorate {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(245, 158, 11, 0.7);
+    margin: 0 0 0.7rem;
+}
+
+.footer-owners {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: clamp(1.1rem, 3.2vw, 1.4rem);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.footer-developer {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: #ffffff;
+    margin: 0 0 1.1rem;
+}
+
+.footer-legal {
+    font-size: 0.65rem;
+    color: rgba(148, 163, 184, 0.8);
+    letter-spacing: 0.06em;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* ── Admin dashboard ─────────────────────────────────────────────────────────── */
+.admin-login-box {
+    text-align: center;
+    max-width: 400px;
+    margin: 2rem auto;
+}
+
+.admin-lock {
+    width: 60px;
+    height: 60px;
+    background: var(--gradient-banner);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    margin: 0 auto 1.2rem;
+    box-shadow: 0 8px 20px rgba(0, 102, 204, 0.25);
+}
+
+.admin-login-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--slate-800);
+    margin: 0 0 0.3rem;
+}
+
+.admin-login-sub {
+    font-size: 0.84rem;
+    color: var(--slate-500);
+    margin: 0 0 1.4rem;
+}
+
+.admin-signin .stButton > button {
+    width: 100% !important;
+    background: var(--gradient-banner) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    border: none !important;
+    border-radius: 10px !important;
+    min-height: 48px !important;
+}
+
+.admin-logout .stButton > button {
+    background: transparent !important;
+    color: var(--slate-500) !important;
+    border: 1px solid var(--slate-200) !important;
+    font-size: 0.8rem !important;
+    border-radius: 999px !important;
+}
+
+.admin-heading {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--slate-800);
+    margin: 0;
+}
+
+.admin-heading span { color: var(--blue-mid); }
+
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin: 1.5rem 0 1.75rem;
+}
+
+.metric-card {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-md);
+    padding: 1.1rem 0.75rem;
+    text-align: center;
+    box-shadow: 0 4px 14px rgba(0, 102, 204, 0.04);
+}
+
+.metric-value {
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: var(--blue-mid);
+    margin: 0;
+    line-height: 1;
+}
+
+.metric-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--slate-500);
+    margin: 0.4rem 0 0;
+}
+
+.metric-card.await .metric-value { color: #d97706; }
+.metric-card.done .metric-value { color: var(--emerald); }
+
+.feed-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--slate-700);
+    margin: 0 0 1rem;
+}
+
+.order-node {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-md);
+    padding: 1.2rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+}
+
+.order-node-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.85rem;
+}
+
+.order-id-text {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--slate-800);
+    margin: 0;
+}
+
+.order-time-text {
+    font-size: 0.72rem;
+    color: var(--slate-400);
+    margin: 0.15rem 0 0;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.badge-pending { background: #fef3c7; color: #b45309; }
+.badge-delivered { background: #d1fae5; color: #047857; }
+
+.field-label-sm {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--slate-400);
+    margin: 0 0 0.2rem;
+}
+
+.info-text {
+    font-size: 0.84rem;
+    color: var(--slate-600);
+    line-height: 1.6;
+    margin: 0 0 0.75rem;
+}
+
+.medicine-grid-box {
+    background: #f8fafc;
+    border: 1px solid var(--slate-200);
+    border-radius: 10px;
+    padding: 0.75rem;
+    font-size: 0.82rem;
+    color: var(--slate-700);
+    white-space: pre-wrap;
+    margin-bottom: 0.75rem;
+}
+
+.rx-preview-frame {
+    background: #f8fafc;
+    border: 2px solid var(--slate-200);
+    border-radius: var(--radius-md);
+    padding: 0.45rem;
+    overflow: hidden;
+}
+
+.rx-empty {
+    background: #f8fafc;
+    border: 1px dashed var(--slate-200);
+    border-radius: var(--radius-md);
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--slate-400);
+    font-size: 0.82rem;
+}
+
+.fulfill-btn .stButton > button {
+    width: 100% !important;
+    background: var(--gradient-cta) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 0.82rem !important;
+    border: none !important;
+    border-radius: 999px !important;
+    min-height: 42px !important;
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3) !important;
+}
+
+.fulfill-btn.done .stButton > button {
+    background: #fef3c7 !important;
+    color: #b45309 !important;
+    box-shadow: none !important;
+}
+
+.empty-feed {
+    text-align: center;
+    padding: 2.5rem;
+    background: #f8fafc;
+    border: 1px dashed var(--slate-200);
+    border-radius: var(--radius-md);
+    color: var(--slate-500);
+    font-size: 0.88rem;
+}
+
+[data-testid="stForm"] {
+    border: none !important;
+    padding: 0 !important;
+}
+
+.secondary-btn .stButton > button {
+    width: 100% !important;
+    background: #ffffff !important;
+    color: var(--blue-mid) !important;
+    border: 1.5px solid var(--slate-200) !important;
+    font-weight: 600 !important;
+    border-radius: 10px !important;
+}
+
+@media (max-width: 640px) {
+    .block-container {
+        margin: 0.75rem 0.5rem 0 !important;
+        padding: 1.35rem 1rem 1.5rem !important;
+        border-radius: 16px;
+    }
+
+    .brand-title {
+        font-size: 0.68rem;
+        letter-spacing: 0.16em;
+    }
+
+    .metric-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .footer-developer {
+        letter-spacing: 0.22em;
+        font-size: 0.7rem;
+    }
+}
