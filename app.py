@@ -3,16 +3,61 @@ import streamlit as st
 import os
 import sqlite3
 from datetime import datetime
-from style_utils import inject_multinational_styles
 
 # 1. Premium Configurations
 st.set_page_config(page_title="Chishtia Medical Store", page_icon="💊", layout="centered")
 
-# Inject professional responsive styles from our style_utils file
-try:
-    inject_multinational_styles()
-except Exception:
-    pass
+# Global UI Theme & Executive Custom Styles (Directly Integrated)
+st.markdown("""
+    <style>
+    html, body, [data-testid="stAppViewContainer"] {
+        background-color: #f4f6f9 !important;
+        overflow-y: auto !important;
+        font-family: 'Inter', sans-serif !important;
+    }
+    .premium-container {
+        background: #ffffff;
+        padding: 35px 25px;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 102, 204, 0.04);
+        margin-bottom: 30px;
+        border: 1px solid #e2e8f0;
+        position: relative;
+    }
+    .premium-container::after {
+        content: "CHISHTIA CARE CLINIC";
+        position: absolute;
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-12deg);
+        font-size: 55px;
+        font-weight: 900;
+        color: rgba(14, 165, 233, 0.02);
+        white-space: nowrap;
+        pointer-events: none;
+        letter-spacing: 6px;
+    }
+    .field-tag { font-weight: 600; color: #0f172a; margin-top: 15px; margin-bottom: 4px; font-size: 14px; }
+    .urdu-subtag { color: #64748b; font-size: 12px; font-weight: 400; margin-left: 5px; }
+    .tool-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; margin-top: 15px; }
+    .tool-title { font-weight: 700; color: #1e3a8a; font-size: 15px; margin-bottom: 8px; }
+    div.stButton > button:first-child {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+        color: white !important; font-weight: 700 !important; font-size: 18px !important;
+        padding: 14px 0px !important; width: 100% !important; border-radius: 12px !important;
+        border: none !important; box-shadow: 0 4px 14px rgba(5,150,105,0.25) !important;
+        transition: all 0.3s ease; margin-top: 15px;
+    }
+    div.stButton > button:first-child:hover {
+        transform: translateY(-2px); box-shadow: 0 6px 20px rgba(5,150,105,0.35) !important;
+    }
+    .executive-footer { background-color: #0f172a; border-radius: 16px; padding: 30px 20px; margin-top: 40px; margin-bottom: 20px; text-align: center; border: 1px solid #1e293b; }
+    .owner-classical-title { font-family: 'Times New Roman', serif; color: #f59e0b; font-size: 20px; letter-spacing: 2px; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
+    .owner-subtitle { color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 20px; }
+    .dev-signature-banner { border-top: 1px solid #1e293b; padding-top: 18px; color: #ffffff; font-size: 15px; font-weight: 800; letter-spacing: 3px; }
+    .system-subtext { color: #475569; font-size: 10px; margin-top: 8px; }
+    </style>
+""", unsafe_allow_html=True)
 
 # Integrated SQLite Database Initialization Logic
 def init_db():
@@ -133,4 +178,4 @@ else:
                 st.success(f"Order Transmitted Successfully! ID: {final_id}")
 
     st.write("---")
-    st.markdown('<div class="executive-footer"><div class="owner-classical-title">Babar Aziz & Sabir Aziz</div><div class="owner-subtitle">Executive Corporate Directorate</div><div class="dev-signature-banner">DEVELOPED BY ABDUL REHMAN</div><div class="system-subtext">© 2026 CHISHTIA MEDICAL STORE • POWERED BY SMART-PWA</div></div>', unsafe_allow_html=True)
+    st.markdown('Babar Aziz & Sabir AzizExecutive Corporate DirectorateDEVELOPED BY ABDUL REHMAN© 2026 CHISHTIA MEDICAL STORE • POWERED BY SMART-PWA', unsafe_allow_html=True)
