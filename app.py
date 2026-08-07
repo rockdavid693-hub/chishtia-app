@@ -9,16 +9,20 @@ init_database()
 
 st.set_page_config(page_title="Chishtia Medical Store", page_icon="💊", layout="wide")
 
-# Session State for Admin Login Check
+# Session State for Page Navigation & Admin Session
+if "current_page" not in st.session_state:
+    st.session_state.current_page = "Home Pharmacy"
 if "admin_logged_in" not in st.session_state:
     st.session_state.admin_logged_in = False
 
-# Premium Mobile-Responsive Styling & Typography
+# Premium Mobile-First Styling (No Sidebar Needed)
 st.markdown("""
     <style>
-    /* Global Mobile Optimizations */
-    [data-testid="stSidebar"] { padding: 10px 5px; }
-    .stButton>button { width: 100% !important; border-radius: 8px !important; height: 45px; font-weight: bold; }
+    /* Hide default Streamlit sidebar elements permanently */
+    [data-testid="stSidebar"] { display: none !important; }
+    [data-testid="collapsedControl"] { display: none !important; }
+    
+    .stButton>button { width: 100% !important; border-radius: 8px !important; height: 48px; font-weight: bold; }
     
     .main-header {
         background: linear-gradient(135deg, #0f4c81, #1d8a99);
@@ -32,6 +36,9 @@ st.markdown("""
     .main-header h1 { font-weight: 700; font-size: 1.8rem; margin-bottom: 5px; color: white !important; }
     .main-header p { font-size: 1rem; font-style: italic; opacity: 0.95; }
     .management-info { font-size: 0.85rem; margin-top: 10px; font-weight: 500; background: rgba(255,255,255,0.15); display: inline-block; padding: 6px 15px; border-radius: 50px; width: 90%; }
+    
+    /* Top Navigation Tab Buttons Styling */
+    .nav-btn-active { background-color: #0f4c81 !important; color: white !important; }
     
     .footer { text-align: center; padding: 1.5rem 1rem; color: #555; font-size: 0.85rem; border-top: 1px solid #e0e0e0; margin-top: 3rem; background-color: #f9f9f9; border-radius: 8px; }
     .footer strong { color: #0f4c81; }
@@ -51,27 +58,41 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# URL Check for Hidden Admin Link (?page=admin)
+# URL Check for Secret Admin Gateway (?page=admin)
 query_params = st.query_params
 is_admin_url = query_params.get("page") == "admin"
 
 if is_admin_url:
-    menu_choice = "Secret Admin Dashboard"
+    st.session_state.current_page = "Secret Admin Dashboard"
 else:
-    st.sidebar.markdown("### Navigational Portal")
-    menu_choice = st.sidebar.radio("Go to:", ["Home Pharmacy", "Order Medicines", "Upload Prescription", "Digital Clinic (Rs.300)"])
+    # Premium Top Grid Navigation Menu for Mobiles (No Arrow Required)
+    st.markdown("### 📱 Select Service / سروس منتخب کریں")
+    nav_col1, nav_col2 = st.columns(2)
+    nav_col3, nav_col4 = st.columns(2)
+    
+    if nav_col1.button("🏡 Home Pharmacy", key="btn_home"):
+        st.session_state.current_page = "Home Pharmacy"
+    if nav_col2.button("🛒 Order Medicines", key="btn_order"):
+        st.session_state.current_page = "Order Medicines"
+    if nav_col3.button("📋 Upload Prescription", key="btn_presc"):
+        st.session_state.current_page = "Upload Prescription"
+    if nav_col4.button("👨‍⚕️ Digital Clinic (Rs.300)", key="btn_clinic"):
+        st.session_state.current_page = "Digital Clinic (Rs.300)"
+        
+    st.markdown(f"**Current Section:** `{st.session_state.current_page}`")
+    st.markdown("---")
 
 # 1. HOME PHARMACY
-if menu_choice == "Home Pharmacy":
+if st.session_state.current_page == "Home Pharmacy":
     st.markdown("### 🌟 Welcome to Chishtia Medical Store")
-    st.write("Aap ghar baithe asani se apni medicines ka order likh kar bhej sakte hain ya doctor ki parchi (prescription) upload kar sakte hain.")
+    st.write("Aap ghar baithe asani se apni medicines ka order likh kar bhej sakte hain ya doctor ki parchi (prescription) upload kar sakte hain. Upar diye gaye buttons par click karke apni matlooba section mein jayein.")
     
     st.markdown("---")
     st.markdown("### 💡 Daily Health Tip")
     st.info("💡 **Stay Hydrated!** Drinking 8-10 glasses of water daily helps flush toxins out of your kidneys and improves your overall metabolic health.")
 
 # 2. ORDER MEDICINES (Direct Manual Written Order Only)
-elif menu_choice == "Order Medicines":
+elif st.session_state.current_page == "Order Medicines":
     st.markdown("## 🛒 Medicine Ordering System")
     st.write("Apni matlooba medicines ki list niche box mein likhein aur apni details darj karke order submit karein.")
     
@@ -94,7 +115,7 @@ elif menu_choice == "Order Medicines":
             save_order(o_id, cust_name, cust_mobile, cust_address, cust_city, "Manual Written Script", full_details, None)
             st.success(f"🎉 Hand-written custom order successfully filed as Order ID: #{o_id}")
 # 3. UPLOAD PRESCRIPTION
-elif menu_choice == "Upload Prescription":
+elif st.session_state.current_page == "Upload Prescription":
     st.markdown("## 📋 Upload Doctor Prescription")
     st.write("Upload a photo or PDF of your doctor's handwritten slip. Our pharmacist will read it and call you.")
     
@@ -121,7 +142,7 @@ elif menu_choice == "Upload Prescription":
             st.success(f"✅ Prescription submitted. Assigned ID: #{o_id}")
 
 # 4. DIGITAL CLINIC (Rs.300)
-elif menu_choice == "Digital Clinic (Rs.300)":
+elif st.session_state.current_page == "Digital Clinic (Rs.300)":
     st.markdown("## 👨‍⚕️ Remote Doctor Consultation Portal")
     st.info("💰 **Consultation Fee: Rs. 300**")
     
@@ -174,7 +195,7 @@ elif menu_choice == "Digital Clinic (Rs.300)":
             st.info("Medical team will check the payment receipt and activate your chat dashboard via phone/SMS shortly.")
 
 # 5. SECRET ALONE ADMIN DASHBOARD
-elif menu_choice == "Secret Admin Dashboard":
+elif st.session_state.current_page == "Secret Admin Dashboard":
     st.markdown("## 🔐 Strategic Operational Dashboard")
     
     if not st.session_state.admin_logged_in:
