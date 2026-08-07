@@ -1,181 +1,257 @@
-"""Chishtia Medical Store — Multinational E-Pharmacy Web Application."""
 import streamlit as st
 import os
-import sqlite3
-from datetime import datetime
+import uuid
+import pandas as pd
+from database import init_database, get_connection, save_order, save_consultation
 
-# 1. Premium Configurations
-st.set_page_config(page_title="Chishtia Medical Store", page_icon="💊", layout="centered")
+# Initialize Database Architecture
+init_database()
 
-# Global UI Theme & Executive Custom Styles (Directly Integrated)
+st.set_page_config(page_title="Chishtia Medical Store", page_icon="💊", layout="wide")
+
+# Session State for Admin Login Check
+if "admin_logged_in" not in st.session_state:
+    st.session_state.admin_logged_in = False
+
+# Premium Mobile-Responsive Styling & Typography
 st.markdown("""
     <style>
-    html, body, [data-testid="stAppViewContainer"] {
-        background-color: #f4f6f9 !important;
-        overflow-y: auto !important;
-        font-family: 'Inter', sans-serif !important;
+    /* Global Mobile Optimizations */
+    [data-testid="stSidebar"] { padding: 10px 5px; }
+    .stButton>button { width: 100% !important; border-radius: 8px !important; height: 45px; font-weight: bold; }
+    
+    .main-header {
+        background: linear-gradient(135deg, #0f4c81, #1d8a99);
+        padding: 1.5rem 1rem;
+        border-radius: 12px;
+        color: white;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
-    .premium-container {
-        background: #ffffff;
-        padding: 35px 25px;
-        border-radius: 20px;
-        box-shadow: 0 15px 35px rgba(0, 102, 204, 0.04);
-        margin-bottom: 30px;
-        border: 1px solid #e2e8f0;
-        position: relative;
-    }
-    .premium-container::after {
-        content: "CHISHTIA CARE CLINIC";
-        position: absolute;
-        top: 40%;
-        left: 50%;
-        transform: translate(-50%, -50%) rotate(-12deg);
-        font-size: 55px;
-        font-weight: 900;
-        color: rgba(14, 165, 233, 0.02);
-        white-space: nowrap;
-        pointer-events: none;
-        letter-spacing: 6px;
-    }
-    .field-tag { font-weight: 600; color: #0f172a; margin-top: 15px; margin-bottom: 4px; font-size: 14px; }
-    .urdu-subtag { color: #64748b; font-size: 12px; font-weight: 400; margin-left: 5px; }
-    .tool-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; margin-top: 15px; }
-    .tool-title { font-weight: 700; color: #1e3a8a; font-size: 15px; margin-bottom: 8px; }
-    div.stButton > button:first-child {
-        background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
-        color: white !important; font-weight: 700 !important; font-size: 18px !important;
-        padding: 14px 0px !important; width: 100% !important; border-radius: 12px !important;
-        border: none !important; box-shadow: 0 4px 14px rgba(5,150,105,0.25) !important;
-        transition: all 0.3s ease; margin-top: 15px;
-    }
-    div.stButton > button:first-child:hover {
-        transform: translateY(-2px); box-shadow: 0 6px 20px rgba(5,150,105,0.35) !important;
-    }
-    .executive-footer { background-color: #0f172a; border-radius: 16px; padding: 30px 20px; margin-top: 40px; margin-bottom: 20px; text-align: center; border: 1px solid #1e293b; }
-    .owner-classical-title { font-family: 'Times New Roman', serif; color: #f59e0b; font-size: 20px; letter-spacing: 2px; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
-    .owner-subtitle { color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 20px; }
-    .dev-signature-banner { border-top: 1px solid #1e293b; padding-top: 18px; color: #ffffff; font-size: 15px; font-weight: 800; letter-spacing: 3px; }
-    .system-subtext { color: #475569; font-size: 10px; margin-top: 8px; }
+    .main-header h1 { font-weight: 700; font-size: 1.8rem; margin-bottom: 5px; color: white !important; }
+    .main-header p { font-size: 1rem; font-style: italic; opacity: 0.95; }
+    .management-info { font-size: 0.85rem; margin-top: 10px; font-weight: 500; background: rgba(255,255,255,0.15); display: inline-block; padding: 6px 15px; border-radius: 50px; width: 90%; }
+    
+    .footer { text-align: center; padding: 1.5rem 1rem; color: #555; font-size: 0.85rem; border-top: 1px solid #e0e0e0; margin-top: 3rem; background-color: #f9f9f9; border-radius: 8px; }
+    .footer strong { color: #0f4c81; }
+    
+    /* Payment Box Mobile Design */
+    .payment-box { background: #f0fdf4; border: 1px dashed #16a34a; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 15px; }
+    .payment-number { font-size: 1.4rem; font-weight: bold; color: #16a34a; background: #ffffff; padding: 5px; border-radius: 5px; border: 1px solid #bbf7d0; display: inline-block; margin-top: 5px; letter-spacing: 1px; }
     </style>
 """, unsafe_allow_html=True)
 
-# Integrated SQLite Database Initialization Logic
-def init_db():
-    conn = sqlite3.connect('orders.db')
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS orders 
-                 (id TEXT PRIMARY KEY, name TEXT, phone TEXT, address TEXT, medicines TEXT, image_path TEXT, status TEXT, timestamp TEXT)''')
-    c.execute('''CREATE TABLE IF NOT EXISTS reminders 
-                 (name TEXT, phone TEXT)''')
-    conn.commit()
-    conn.close()
+# Premium Branding Header
+st.markdown("""
+    <div class="main-header">
+        <h1>CHISHTIA MEDICAL STORE</h1>
+        <p>Your Trusted Digital Healthcare Partner</p>
+        <div class="management-info">🏥 Owned & Managed by Babar Aziz and Sabir Aziz</div>
+    </div>
+""", unsafe_allow_html=True)
 
-init_db()
-
-if not os.path.exists("prescriptions"):
-    os.makedirs("prescriptions")
-
-# URL Query Routing Logic (?view=admin)
+# URL Check for Hidden Admin Link (?page=admin)
 query_params = st.query_params
+is_admin_url = query_params.get("page") == "admin"
 
-if query_params.get("view") == "admin":
-    # ==========================================
-    # INTERNAL SECURE ADMIN VIEW
-    # ==========================================
-    st.markdown("<div style='background:linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); padding:20px; border-radius:12px; text-align:center; color:white; margin-bottom:25px;'><h2 style='margin:0;'>🛡️ CHISHTIA MANAGEMENT DESK</h2><p style='margin:5px 0 0 0; opacity:0.8; font-size:13px;'>Internal Store Management System</p></div>", unsafe_allow_html=True)
-    
-    if 'authenticated' not in st.session_state:
-        st.session_state['authenticated'] = False
-        
-    if not st.session_state['authenticated']:
-        st.subheader("Security Verification")
-        admin_password = st.text_input("Yahan Admin Password Likhein:", type="password")
-        if st.button("Unlock Dashboard Systems"):
-            if admin_password.strip() == "chishtia123":
-                st.session_state['authenticated'] = True
-                st.rerun()
-            else:
-                st.error("Ghalat Password!")
-    else:
-        if st.sidebar.button("Logout"):
-            st.session_state['authenticated'] = False
-            st.rerun()
-            
-        conn = sqlite3.connect('orders.db')
-        c = conn.cursor()
-        all_orders = c.execute("SELECT * FROM orders ORDER BY timestamp DESC").fetchall()
-        
-        st.metric("Total Received Orders", len(all_orders))
-        st.write("---")
-        
-        for order in all_orders:
-            o_id, o_name, o_phone, o_address, o_meds, o_img, o_status, o_time = order
-            with st.container():
-                st.markdown(f'<div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom:15px;"><h4>📦 Order ID: {o_id}</h4><p><b>Client:</b> {o_name} | <b>Phone:</b> {o_phone}</p><p><b>Address:</b> {o_address}</p><p style="background:#f8fafc; padding:10px; border-radius:8px;"><b>Medicines:</b><br>{o_meds if o_meds else "Parchi Uploaded"}</p><p><b>Status:</b> {o_status}</p></div>', unsafe_allow_html=True)
-                if o_img and os.path.exists(o_img):
-                    st.image(o_img, width=280)
-                if o_status != "Delivered":
-                    if st.button(f"Mark Delivered ({o_id})", key=o_id):
-                        c.execute("UPDATE orders SET status='Delivered' WHERE id=?", (o_id,))
-                        conn.commit()
-                        st.rerun()
-        conn.close()
+if is_admin_url:
+    menu_choice = "Secret Admin Dashboard"
 else:
-    # ==========================================
-    # GLOBAL MULTINATIONAL CUSTOMER VIEW
-    # ==========================================
+    st.sidebar.markdown("### Navigational Portal")
+    menu_choice = st.sidebar.radio("Go to:", ["Home Pharmacy", "Order Medicines", "Upload Prescription", "Digital Clinic (Rs.300)"])
+
+# 1. HOME PHARMACY
+if menu_choice == "Home Pharmacy":
+    st.markdown("### 🌟 Welcome to Chishtia Medical Store")
+    st.write("Aap ghar baithe asani se apni medicines ka order likh kar bhej sakte hain ya doctor ki parchi (prescription) upload kar sakte hain.")
+    
+    st.markdown("---")
+    st.markdown("### 💡 Daily Health Tip")
+    st.info("💡 **Stay Hydrated!** Drinking 8-10 glasses of water daily helps flush toxins out of your kidneys and improves your overall metabolic health.")
+
+# 2. ORDER MEDICINES (Direct Manual Written Order Only)
+elif menu_choice == "Order Medicines":
+    st.markdown("## 🛒 Medicine Ordering System")
+    st.write("Apni matlooba medicines ki list niche box mein likhein aur apni details darj karke order submit karein.")
+    
+    st.markdown("### 👤 Step 1: Provide Delivery Information")
+    cust_name = st.text_input("Full Name *")
+    cust_mobile = st.text_input("Mobile Number *")
+    cust_city = st.selectbox("City *", ["Sahiwal", "Lahore", "Karachi", "Islamabad", "Faisalabad", "Multan"])
+    cust_address = st.text_area("Complete Residential Address *")
+    
+    st.markdown("### 📝 Step 2: Write Your Medicine Requirements")
+    written_order = st.text_area("List your required medicines & amounts *:", placeholder="Example:\nPanadol 500mg - 2 Packs\nAugmentin 625mg - 1 Strip")
+    instructions = st.text_input("Special Instructions (Optional)", placeholder="e.g. Please deliver after 5:00 PM")
+    
+    if st.button("🚀 Submit Written Order", type="primary"):
+        if not cust_name or not cust_mobile or not cust_address or not written_order:
+            st.error("⚠️ Verification Failed! Ensure details and medicine requirement script are filled.")
+        else:
+            o_id = str(uuid.uuid4())[:8].upper()
+            full_details = f"Order Script:\n{written_order}\n\nInstructions: {instructions}"
+            save_order(o_id, cust_name, cust_mobile, cust_address, cust_city, "Manual Written Script", full_details, None)
+            st.success(f"🎉 Hand-written custom order successfully filed as Order ID: #{o_id}")
+# 3. UPLOAD PRESCRIPTION
+elif menu_choice == "Upload Prescription":
+    st.markdown("## 📋 Upload Doctor Prescription")
+    st.write("Upload a photo or PDF of your doctor's handwritten slip. Our pharmacist will read it and call you.")
+    
+    st.markdown("### 👤 Patient & Delivery Details")
+    p_name = st.text_input("Full Patient Name *")
+    p_mobile = st.text_input("Mobile Number *")
+    p_city = st.selectbox("City Delivery Destination *", ["Sahiwal", "Lahore", "Karachi", "Islamabad", "Faisalabad", "Multan"])
+    p_address = st.text_area("Complete Address *")
+    
+    uploaded_file = st.file_uploader("Choose Prescription File (Image/PDF) *", type=["png", "jpg", "jpeg", "pdf"])
+    p_notes = st.text_area("Additional Notes (Optional)")
+    
+    if st.button("📤 Upload and Dispatch Order", type="primary"):
+        if not p_name or not p_mobile or not p_address or not uploaded_file:
+            st.error("⚠️ Ensure patient details and prescription file are uploaded.")
+        else:
+            o_id = str(uuid.uuid4())[:8].upper()
+            file_ext = os.path.splitext(uploaded_file.name)[1]
+            saved_filename = f"uploads/prescriptions/{o_id}{file_ext}"
+            with open(saved_filename, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+                
+            save_order(o_id, p_name, p_mobile, p_address, p_city, "Prescription Upload", f"Notes: {p_notes}", saved_filename)
+            st.success(f"✅ Prescription submitted. Assigned ID: #{o_id}")
+
+# 4. DIGITAL CLINIC (Rs.300)
+elif menu_choice == "Digital Clinic (Rs.300)":
+    st.markdown("## 👨‍⚕️ Remote Doctor Consultation Portal")
+    st.info("💰 **Consultation Fee: Rs. 300**")
+    
+    st.markdown("#### 💳 Step 1: Send Fee to Babar Aziz (JazzCash/EasyPaisa)")
     st.markdown("""
-    <div class="premium-container">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px;">
-            <svg width="45" height="45" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org">
-                <path d="M12 2V22" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round"/>
-                <path d="M12 2C13.5 2 14.5 3 14.5 4.5C14.5 6 12 7.5 12 7.5" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
-                <path d="M12 22C6.5 19 6.5 14 9.5 12.5C12.5 11 11.5 9 14.5 8C17.5 7 17.5 4.5 15 3.5" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <circle cx="12" cy="2" r="1.25" fill="#f59e0b"/>
-            </svg>
-            <h1 style="margin: 0; font-size: 26px; font-weight: 800; color: #0f172a;">CHISHTIA MEDICAL STORE</h1>
-        </div>
-        <div style="background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); padding: 18px; border-radius: 12px; text-align: center; color: white;">
-            <div style="font-size: 13px; font-weight: 600; letter-spacing: 2px;">MULTINATIONAL E-PHARMACY GATEWAY</div>
-            <div style="font-size: 11px; opacity: 0.7; margin-top: 4px;">⚡ Free 30-Minute Home Delivery Within 3KM Operations</div>
-        </div>
+    <div class="payment-box">
+        <p style="margin:0; font-weight:bold; color:#15803d;">📱 JazzCash & EasyPaisa Number</p>
+        <div class="payment-number">03009609625</div>
+        <p style="margin-top:5px; margin-bottom:0; font-size:0.9rem; color:#166534;">Account Title: <strong>BABAR AZIZ</strong></p>
     </div>
     """, unsafe_allow_html=True)
-
-    tab_selection = st.radio("Order Ka Tarika Chunein:", ["📸 Upload Digital Prescription (Parchi)", "✍️ Enter Medicine Text Grid (Naam Likhein)"])
-
-    with st.form(key="pharmacy_dispatch_form"):
-        st.markdown('<div class="field-tag">Apna Name (Full Name) *</div>', unsafe_allow_html=True)
-        cust_name = st.text_input("", placeholder="Abdul Rehman", key="cust_name", label_visibility="collapsed")
-        st.markdown('<div class="field-tag">WhatsApp Contact Number *</div>', unsafe_allow_html=True)
-        cust_phone = st.text_input("", placeholder="03009609625", key="cust_phone", label_visibility="collapsed")
-        st.markdown('<div class="field-tag">Delivery Destination Address *</div>', unsafe_allow_html=True)
-        cust_address = st.text_area("", placeholder="Complete address details", key="cust_address", label_visibility="collapsed")
-        
-        mounted_file, typed_meds = None, ""
-        if "Upload Digital Prescription" in tab_selection:
-            mounted_file = st.file_uploader("Upload Parchi Image", type=["jpg", "jpeg", "png"])
+    
+    st.markdown("#### 📝 Step 2: Fill Case Profile & Upload Proof")
+    pat_name = st.text_input("Patient Full Name *")
+    pat_mob = st.text_input("Mobile / Contact Info *")
+    symptoms_text = st.text_area("Describe Symptoms / Current Problems *", placeholder="Fever for last 2 days...")
+    
+    st.markdown("##### 📱 Mobile Voice Feature & Assets Manager")
+    voice_note = st.file_uploader("🎤 Send Voice Note / Audio Recording", type=["mp3", "wav", "m4a", "ogg"])
+    med_report = st.file_uploader("📎 Upload Medical Report", type=["pdf", "png", "jpg", "jpeg"])
+    pay_ss = st.file_uploader("💵 Upload Payment Receipt Screenshot *", type=["png", "jpg", "jpeg"])
+    
+    if st.button("Submit Case to Doctor Panel", type="primary"):
+        if not pat_name or not pat_mob or not symptoms_text or not pay_ss:
+            st.error("⚠️ You must provide identity, symptoms, and payment screenshot.")
         else:
-            typed_meds = st.text_area("Type Medicines Here")
+            c_id = "CON-" + str(uuid.uuid4())[:6].upper()
             
-        if st.form_submit_button(label="🚀 TRANSMIT DISPATCH ORDER"):
-            if not cust_name or not cust_phone or not cust_address:
-                st.error("Fields missing!")
-            else:
-                stamp_id = datetime.now().strftime("%Y%m%d_%H%M%S")
-                final_id = f"CMS-LOGIX-{stamp_id}"
-                img_save_route = ""
-                if mounted_file is not None:
-                    img_save_route = f"prescriptions/{final_id}.png"
-                    with open(img_save_route, "wb") as f:
-                        f.write(mounted_file.getbuffer())
+            file_ext_ss = os.path.splitext(pay_ss.name)[1]
+            ss_path = f"uploads/payments/{c_id}_payment{file_ext_ss}"
+            with open(ss_path, "wb") as f: 
+                f.write(pay_ss.getbuffer())
                 
-                conn = sqlite3.connect('orders.db')
-                c = conn.cursor()
-                c.execute("INSERT INTO orders VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (final_id, cust_name, cust_phone, cust_address, typed_meds, img_save_route, "Pending", datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-                conn.commit()
-                conn.close()
-                st.success(f"Order Transmitted Successfully! ID: {final_id}")
+            f_path = None
+            if med_report:
+                file_ext_rep = os.path.splitext(med_report.name)[1]
+                f_path = f"uploads/consultations/{c_id}_report{file_ext_rep}"
+                with open(f_path, "wb") as f: 
+                    f.write(med_report.getbuffer())
+                    
+            v_path = None
+            if voice_note:
+                file_ext_v = os.path.splitext(voice_note.name)[1]
+                v_path = f"uploads/consultations/{c_id}_audio{file_ext_v}"
+                with open(v_path, "wb") as f: 
+                    f.write(voice_note.getbuffer())
+                    
+            save_consultation(c_id, pat_name, pat_mob, ss_path, symptoms_text, f_path, v_path)
+            st.success(f"🚀 Consultation Registered perfectly. Tracking ID: {c_id}") 
+            st.info("Medical team will check the payment receipt and activate your chat dashboard via phone/SMS shortly.")
 
-    st.write("---")
-    st.markdown('Babar Aziz & Sabir AzizExecutive Corporate DirectorateDEVELOPED BY ABDUL REHMAN© 2026 CHISHTIA MEDICAL STORE • POWERED BY SMART-PWA', unsafe_allow_html=True)
+# 5. SECRET ALONE ADMIN DASHBOARD
+elif menu_choice == "Secret Admin Dashboard":
+    st.markdown("## 🔐 Strategic Operational Dashboard")
+    
+    if not st.session_state.admin_logged_in:
+        admin_pass = st.text_input("Input Secure Dashboard Password", type="password")
+        if st.button("Verify Authentication"):
+            if admin_pass == "chishtia786":
+                st.session_state.admin_logged_in = True
+                st.rerun()
+            else:
+                st.error("Authentication Denied!")
+                
+    if st.session_state.admin_logged_in:
+        st.success("Access Granted. Welcome back Babar & Sabir Aziz.")
+        if st.button("🚪 Logout Admin Session"):
+            st.session_state.admin_logged_in = False
+            st.rerun()
+            
+        adm_tabs = st.tabs(["📦 Orders Ledger", "🩺 Clinic Consultations"])
+        
+        with adm_tabs[0]:
+            st.markdown("### Active Customer Orders")
+            conn = get_connection()
+            orders_df = pd.read_sql_query("SELECT * FROM orders ORDER BY timestamp DESC", conn)
+            conn.close()
+            
+            if not orders_df.empty:
+                for index, row in orders_df.iterrows():
+                    with st.expander(f"Order {row['order_id']} - {row['customer_name']} [{row['status']}]"):
+                        st.write(f"**Contact:** {row['mobile']} | **Location:** {row['city']}, {row['address']}")
+                        st.info(f"**Contents:** {row['order_details']}")
+                        if row['prescription_path']:
+                            st.image(row['prescription_path'], width=300)
+                            
+                        new_status = st.selectbox("Update Status", ["Pending", "Confirmed", "Preparing", "Delivered", "Cancelled"], key=f"status_{row['order_id']}", index=["Pending", "Confirmed", "Preparing", "Delivered", "Cancelled"].index(row['status']))
+                        if st.button("Update Status", key=f"up_{row['order_id']}"):
+                            conn = get_connection()
+                            conn.execute("UPDATE orders SET status = ? WHERE order_id = ?", (new_status, row['order_id']))
+                            conn.commit()
+                            conn.close()
+                            st.success("Status updated!")
+                            st.rerun()
+            else:
+                st.write("No incoming product orders recorded yet.")
+                
+        with adm_tabs[1]:
+            st.markdown("### Telemedicine Clinical Requests")
+            conn = get_connection()
+            cons_df = pd.read_sql_query("SELECT * FROM consultations ORDER BY timestamp DESC", conn)
+            conn.close()
+            
+            if not cons_df.empty:
+                for idx, row in cons_df.iterrows():
+                    with st.expander(f"Consultation {row['consultation_id']} - {row['patient_name']} [{row['status']}]"):
+                        st.write(f"**Contact:** {row['mobile']}")
+                        st.warning(f"**Symptoms:** {row['symptoms']}")
+                        st.image(row['payment_screenshot'], width=250)
+                        
+                        if row['file_path']: st.image(row['file_path'], width=250)
+                        if row['voice_path']: st.audio(row['voice_path'])
+                            
+                        new_c_status = st.selectbox("Action Payment Status", ["Pending Verification", "Approved", "Rejected"], key=f"c_stat_{row['consultation_id']}", index=["Pending Verification", "Approved", "Rejected"].index(row['status']))
+                        dr_txt = st.text_area("Doctor Reply Input", value=row['doctor_reply'] if row['doctor_reply'] else "", key=f"dr_txt_{row['consultation_id']}")
+                        
+                        if st.button("Apply Operational Decision", key=f"c_btn_{row['consultation_id']}"):
+                            conn = get_connection()
+                            conn.execute("UPDATE consultations SET status = ?, doctor_reply = ? WHERE consultation_id = ?", (new_c_status, dr_txt, row['consultation_id']))
+                            conn.commit()
+                            conn.close()
+                            st.success("Case updated!")
+                            st.rerun()
+            else:
+                st.write("No premium consultation clinical bookings registered yet.")
+
+# Universal Corporate Footer Branding
+st.markdown("""
+    <div class="footer">
+        <p>© 2026 <strong>Chishtia Medical Store</strong>. All Strategic Rights Reserved.</p>
+        <p style="font-size: 0.85rem; letter-spacing: 1px; color:#555;">Managed by <strong>Babar Aziz & Sabir Aziz</strong> | System Design & Framework <strong>Developed by Abdul Rehman</strong></p>
+    </div>
+""", unsafe_allow_html=True)
