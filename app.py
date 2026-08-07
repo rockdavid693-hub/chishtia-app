@@ -37,9 +37,6 @@ st.markdown("""
     .main-header p { font-size: 1rem; font-style: italic; opacity: 0.95; }
     .management-info { font-size: 0.85rem; margin-top: 10px; font-weight: 500; background: rgba(255,255,255,0.15); display: inline-block; padding: 6px 15px; border-radius: 50px; width: 90%; }
     
-    /* Top Navigation Tab Buttons Styling */
-    .nav-btn-active { background-color: #0f4c81 !important; color: white !important; }
-    
     .footer { text-align: center; padding: 1.5rem 1rem; color: #555; font-size: 0.85rem; border-top: 1px solid #e0e0e0; margin-top: 3rem; background-color: #f9f9f9; border-radius: 8px; }
     .footer strong { color: #0f4c81; }
     
@@ -90,7 +87,6 @@ if st.session_state.current_page == "Home Pharmacy":
     st.markdown("---")
     st.markdown("### 💡 Daily Health Tip")
     st.info("💡 **Stay Hydrated!** Drinking 8-10 glasses of water daily helps flush toxins out of your kidneys and improves your overall metabolic health.")
-
 # 2. ORDER MEDICINES (Direct Manual Written Order Only)
 elif st.session_state.current_page == "Order Medicines":
     st.markdown("## 🛒 Medicine Ordering System")
@@ -114,6 +110,7 @@ elif st.session_state.current_page == "Order Medicines":
             full_details = f"Order Script:\n{written_order}\n\nInstructions: {instructions}"
             save_order(o_id, cust_name, cust_mobile, cust_address, cust_city, "Manual Written Script", full_details, None)
             st.success(f"🎉 Hand-written custom order successfully filed as Order ID: #{o_id}")
+
 # 3. UPLOAD PRESCRIPTION
 elif st.session_state.current_page == "Upload Prescription":
     st.markdown("## 📋 Upload Doctor Prescription")
@@ -133,14 +130,13 @@ elif st.session_state.current_page == "Upload Prescription":
             st.error("⚠️ Ensure patient details and prescription file are uploaded.")
         else:
             o_id = str(uuid.uuid4())[:8].upper()
-            file_ext = os.path.splitext(uploaded_file.name)[1]
+            file_ext = os.path.splitext(uploaded_file.name).lower()
             saved_filename = f"uploads/prescriptions/{o_id}{file_ext}"
             with open(saved_filename, "wb") as f:
                 f.write(uploaded_file.getbuffer())
                 
             save_order(o_id, p_name, p_mobile, p_address, p_city, "Prescription Upload", f"Notes: {p_notes}", saved_filename)
             st.success(f"✅ Prescription submitted. Assigned ID: #{o_id}")
-
 # 4. DIGITAL CLINIC (Rs.300)
 elif st.session_state.current_page == "Digital Clinic (Rs.300)":
     st.markdown("## 👨‍⚕️ Remote Doctor Consultation Portal")
@@ -171,21 +167,21 @@ elif st.session_state.current_page == "Digital Clinic (Rs.300)":
         else:
             c_id = "CON-" + str(uuid.uuid4())[:6].upper()
             
-            file_ext_ss = os.path.splitext(pay_ss.name)[1]
+            file_ext_ss = os.path.splitext(pay_ss.name).lower()
             ss_path = f"uploads/payments/{c_id}_payment{file_ext_ss}"
             with open(ss_path, "wb") as f: 
                 f.write(pay_ss.getbuffer())
                 
             f_path = None
             if med_report:
-                file_ext_rep = os.path.splitext(med_report.name)[1]
+                file_ext_rep = os.path.splitext(med_report.name).lower()
                 f_path = f"uploads/consultations/{c_id}_report{file_ext_rep}"
                 with open(f_path, "wb") as f: 
                     f.write(med_report.getbuffer())
                     
             v_path = None
             if voice_note:
-                file_ext_v = os.path.splitext(voice_note.name)[1]
+                file_ext_v = os.path.splitext(voice_note.name).lower()
                 v_path = f"uploads/consultations/{c_id}_audio{file_ext_v}"
                 with open(v_path, "wb") as f: 
                     f.write(voice_note.getbuffer())
@@ -226,8 +222,13 @@ elif st.session_state.current_page == "Secret Admin Dashboard":
                     with st.expander(f"Order {row['order_id']} - {row['customer_name']} [{row['status']}]"):
                         st.write(f"**Contact:** {row['mobile']} | **Location:** {row['city']}, {row['address']}")
                         st.info(f"**Contents:** {row['order_details']}")
-                        if row['prescription_path']:
-                            st.image(row['prescription_path'], width=300)
+                        
+                        if row['prescription_path'] and os.path.exists(row['prescription_path']):
+                            if row['prescription_path'].lower().endswith('.pdf'):
+                                with open(row['prescription_path'], "rb") as f:
+                                    st.download_button("📥 Download PDF Prescription", f.read(), file_name=os.path.basename(row['prescription_path']), key=f"dl_{row['order_id']}")
+                            else:
+                                st.image(row['prescription_path'], width=300)
                             
                         new_status = st.selectbox("Update Status", ["Pending", "Confirmed", "Preparing", "Delivered", "Cancelled"], key=f"status_{row['order_id']}", index=["Pending", "Confirmed", "Preparing", "Delivered", "Cancelled"].index(row['status']))
                         if st.button("Update Status", key=f"up_{row['order_id']}"):
@@ -251,10 +252,24 @@ elif st.session_state.current_page == "Secret Admin Dashboard":
                     with st.expander(f"Consultation {row['consultation_id']} - {row['patient_name']} [{row['status']}]"):
                         st.write(f"**Contact:** {row['mobile']}")
                         st.warning(f"**Symptoms:** {row['symptoms']}")
-                        st.image(row['payment_screenshot'], width=250)
                         
-                        if row['file_path']: st.image(row['file_path'], width=250)
-                        if row['voice_path']: st.audio(row['voice_path'])
+                        if row['payment_screenshot'] and os.path.exists(row['payment_screenshot']):
+                            if row['payment_screenshot'].lower().endswith('.pdf'):
+                                with open(row['payment_screenshot'], "rb") as f:
+                                    st.download_button("📥 Download Payment PDF", f.read(), file_name=os.path.basename(row['payment_screenshot']), key=f"dl_pay_{row['consultation_id']}")
+                            else:
+                                st.image(row['payment_screenshot'], width=250)
+                        
+                        if row['file_path'] and os.path.exists(row['file_path']):
+                            if row['file_path'].lower().endswith('.pdf'):
+                                with open(row['file_path'], "rb") as f:
+                                    st.download_button("📥 Download Medical Report PDF", f.read(), file_name=os.path.basename(row['file_path']), key=f"dl_rep_{row['consultation_id']}")
+                            else:
+                                st.image(row['file_path'], width=250)
+                                
+                        if row['voice_path'] and os.path.exists(row['voice_path']):
+                            st.write("🎤 Patient Voice Recording:")
+                            st.audio(row['voice_path'])
                             
                         new_c_status = st.selectbox("Action Payment Status", ["Pending Verification", "Approved", "Rejected"], key=f"c_stat_{row['consultation_id']}", index=["Pending Verification", "Approved", "Rejected"].index(row['status']))
                         dr_txt = st.text_area("Doctor Reply Input", value=row['doctor_reply'] if row['doctor_reply'] else "", key=f"dr_txt_{row['consultation_id']}")
