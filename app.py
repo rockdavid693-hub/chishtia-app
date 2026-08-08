@@ -205,6 +205,40 @@ elif st.session_state.current_page == "Digital Clinic (Rs.300)":
             st.success(f"🚀 Consultation Registered perfectly! Track using ID: **{c_id}**") 
             st.info(f"*(Doctor ki clinic me aap ka case submit hogya hai. Tracking ID **{c_id}** hai. Fees verify hote hi doctor reply yahan bhej denge).*")
 
+# 5. USER ORDER HISTORY & TRACKING PORTAL (SMART AUTO-CLEAN LOGIC)
+elif st.session_state.current_page == "Track My Order":
+    st.markdown("## 🔍 Personal Order History & Status Tracker / Order Check Karein")
+    st.write("Apne order ka status (Pending, Preparing, Delivered) dekhne ke liye apna Mobile Number ya Order ID darj karein:")
+    st.write("*(Apna order check karne ke liye apna Phone Number ya Order ID likhein):*")
+    
+    search_input = st.text_input("Enter Mobile Number or Order ID / Phone ya ID Likhein:")
+    
+    if search_input:
+        # Smart Clean: Remove extra spaces, hash signs (#) and make it UPPERCASE
+        clean_input = search_input.strip().replace("#", "").upper()
+        
+        conn = get_connection()
+        user_orders = conn.execute("SELECT * FROM orders WHERE mobile = ? OR order_id = ? ORDER BY timestamp DESC", (search_input, clean_input)).fetchall()
+        user_consults = conn.execute("SELECT * FROM consultations WHERE mobile = ? OR consultation_id = ? ORDER BY timestamp DESC", (search_input, clean_input)).fetchall()
+        conn.close()
+        
+        st.markdown("### 📦 Aap Ke Medicine Orders / Dawaion Ke Orders:")
+        if user_orders:
+            for row in user_orders:
+                status_class = f"status-{row['status'].lower()}"
+                st.markdown(f"""
+                <div style="border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 10px; background-color: #fafafa;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <b>Order ID: #{row['order_id']}</b>
+                        <span class="status-badge {status_class}">{row['status']}</span>
+                    </div>
+                    <p style="margin: 5px 0; font-size: 0.9rem; color: #555;"><b>Date / Tareekh:</b> {row['timestamp']}</p>
+                    <p style="margin: 5px 0; font-size: 0.9rem; color: #333;"><b>Order Items / Dawaai:</b><br>{row['order_details']}</p>
+                </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.info("Is number/ID se koi medicine order nahi mila. / Is number par koi order nahi mila.")
+
 # 5. USER ORDER HISTORY & TRACKING PORTAL
 elif st.session_state.current_page == "Track My Order":
     st.markdown("## 🔍 Personal Order History & Status Tracker / Order Check Karein")
