@@ -73,7 +73,7 @@ else:
     # Premium Top Grid Navigation Menu for Mobiles (5 Buttons Total)
     st.markdown("### 📱 Select Service / Koi bhi aik service chunein:")
         nav_col1, nav_col2, nav_col3 = st.columns(3)
-    nav_col4, nav_col5, nav_col6 = st.columns(3)
+        nav_col4, nav_col5, nav_col6 = st.columns(3)
 
     
     if nav_col1.button("🏡 Home Pharmacy\n(Main Page)", key="btn_home"):
