@@ -67,6 +67,9 @@ st.markdown("""
 query_params = st.query_params
 is_admin_url = query_params.get("page") == "admin"
 
+if is_admin_url:
+    st.session_state.current_page = "Secret Admin Dashboard"
+else:
     # Premium Top Grid Navigation Menu for Mobiles (5 Buttons Total)
     st.markdown("### 📱 Select Service / Koi bhi aik service chunein:")
     nav_col1, nav_col2, nav_col3 = st.columns(3)
@@ -82,10 +85,6 @@ is_admin_url = query_params.get("page") == "admin"
         st.session_state.current_page = "Digital Clinic (Rs.300)"
     if nav_col5.button("🔍 Track My Order\n(Order Ka Status)", key="btn_track"):
         st.session_state.current_page = "Track My Order"
-        
-    st.markdown(f"**Current Section / Aap is page par hain:** `{st.session_state.current_page}`")
-    st.markdown("---")
-
         
     st.markdown(f"**Current Section / Aap is page par hain:** `{st.session_state.current_page}`")
     st.markdown("---")
