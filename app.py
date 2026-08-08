@@ -179,7 +179,7 @@ elif st.session_state.current_page == "Digital Clinic (Rs.300)":
     if st.button("Submit Case to Doctor Panel / Doctor Ko Bhejein", type="primary"):
         # Yahan check karein ke pay_ss ke paas 'name' attribute hai ya nahi
      if not pat_name or not pat_mob or not symptoms_text or not pay_ss or not hasattr(pay_ss, 'name'):
-    st.error("⚠️ You must provide identity, symptoms, and payment screenshot. / Naam, bemari ki details aur fees ka screenshot lazmi hai.")
+     st.error("⚠️ You must provide identity, symptoms, and payment screenshot. / Naam, bemari ki details aur fees ka screenshot lazmi hai.")
 else:
     c_id = "CON-" + str(uuid.uuid4())[:6].upper()
     
