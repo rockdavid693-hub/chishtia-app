@@ -43,6 +43,14 @@ st.markdown("""
     /* Payment Box Mobile Design */
     .payment-box { background: #f0fdf4; border: 1px dashed #16a34a; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 15px; }
     .payment-number { font-size: 1.4rem; font-weight: bold; color: #16a34a; background: #ffffff; padding: 5px; border-radius: 5px; border: 1px solid #bbf7d0; display: inline-block; margin-top: 5px; letter-spacing: 1px; }
+    
+    /* Order History Styling */
+    .status-badge { padding: 4px 10px; border-radius: 50px; font-size: 0.85rem; font-weight: bold; display: inline-block; }
+    .status-pending { background-color: #fef3c7; color: #d97706; }
+    .status-preparing { background-color: #e0f2fe; color: #0369a1; }
+    .status-confirmed { background-color: #dcfce7; color: #15803d; }
+    .status-delivered { background-color: #dcfce7; color: #166534; border: 1px solid #16a34a; }
+    .status-cancelled { background-color: #fee2e2; color: #991b1b; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -50,7 +58,7 @@ st.markdown("""
 st.markdown("""
     <div class="main-header">
         <h1>CHISHTIA MEDICAL STORE</h1>
-        <p>Your Trusted Digital Healthcare Partner</p>
+        <p>Your Trusted Digital Healthcare Partner / Aap Ka Ehtemaad Shuda Digital Pharmacy</p>
         <div class="management-info">🏥 Owned & Managed by Babar Aziz and Sabir Aziz</div>
     </div>
 """, unsafe_allow_html=True)
@@ -62,72 +70,78 @@ is_admin_url = query_params.get("page") == "admin"
 if is_admin_url:
     st.session_state.current_page = "Secret Admin Dashboard"
 else:
-    # Premium Top Grid Navigation Menu for Mobiles (No Arrow Required)
-    st.markdown("### 📱 Select Service / سروس منتخب کریں")
-    nav_col1, nav_col2 = st.columns(2)
-    nav_col3, nav_col4 = st.columns(2)
+    # Premium Top Grid Navigation Menu for Mobiles (5 Buttons Total)
+    st.markdown("### 📱 Select Service / Koi bhi aik service chunein:")
+    nav_col1, nav_col2, nav_col3 = st.columns(3)
+    nav_col4, nav_col5, _ = st.columns()
     
-    if nav_col1.button("🏡 Home Pharmacy", key="btn_home"):
+    if nav_col1.button("🏡 Home Pharmacy\n(Main Page)", key="btn_home"):
         st.session_state.current_page = "Home Pharmacy"
-    if nav_col2.button("🛒 Order Medicines", key="btn_order"):
+    if nav_col2.button("🛒 Order Medicines\n(Dawaai Likhein)", key="btn_order"):
         st.session_state.current_page = "Order Medicines"
-    if nav_col3.button("📋 Upload Prescription", key="btn_presc"):
+    if nav_col3.button("📋 Upload Prescription\n(Parchi Bhejein)", key="btn_presc"):
         st.session_state.current_page = "Upload Prescription"
-    if nav_col4.button("👨‍⚕️ Digital Clinic (Rs.300)", key="btn_clinic"):
+    if nav_col4.button("👨‍⚕️ Digital Clinic (Rs.300)\n(Doctor Se Baat)", key="btn_clinic"):
         st.session_state.current_page = "Digital Clinic (Rs.300)"
+    if nav_col5.button("🔍 Track My Order\n(Order Ka Status)", key="btn_track"):
+        st.session_state.current_page = "Track My Order"
         
-    st.markdown(f"**Current Section:** `{st.session_state.current_page}`")
+    st.markdown(f"**Current Section / Aap is page par hain:** `{st.session_state.current_page}`")
     st.markdown("---")
 
 # 1. HOME PHARMACY
 if st.session_state.current_page == "Home Pharmacy":
-    st.markdown("### 🌟 Welcome to Chishtia Medical Store")
-    st.write("Aap ghar baithe asani se apni medicines ka order likh kar bhej sakte hain ya doctor ki parchi (prescription) upload kar sakte hain. Upar diye gaye buttons par click karke apni matlooba section mein jayein.")
+    st.markdown("### 🌟 Welcome to Chishtia Medical Store / KhushAamdeed")
+    st.write("Aap ghar baithe asani se apni medicines ka order likh kar bhej sakte hain ya doctor ki parchi (prescription) upload kar sakte hain. Apna order track karne ke liye 'Track My Order' par click karein.")
+    st.write("*(Aap ghar baithe aasaani se apni dawaion ka order likh kar bhejin ya doctor ki parchi upload karein. Apna order check karne ke liye Track My Order button dabayein).*")
     
     st.markdown("---")
-    st.markdown("### 💡 Daily Health Tip")
-    st.info("💡 **Stay Hydrated!** Drinking 8-10 glasses of water daily helps flush toxins out of your kidneys and improves your overall metabolic health.")
+    st.markdown("### 💡 Daily Health Tip / Sehat Ki Baat")
+    st.info("💡 **Stay Hydrated!** Drinking 8-10 glasses of water daily helps flush toxins out of your kidneys and improves your overall metabolic health.\n\n*(Rozana 8 se 10 glass paani peene se gurde saaf rehte hain aur sehat behtar hoti hai).*")
 # 2. ORDER MEDICINES (Direct Manual Written Order Only)
 elif st.session_state.current_page == "Order Medicines":
-    st.markdown("## 🛒 Medicine Ordering System")
+    st.markdown("## 🛒 Medicine Ordering System / Dawaai Ka Order")
     st.write("Apni matlooba medicines ki list niche box mein likhein aur apni details darj karke order submit karein.")
+    st.write("*(Apni dawaion ki list neeche box me likhein aur apni details de kar order bhejein).*")
     
-    st.markdown("### 👤 Step 1: Provide Delivery Information")
-    cust_name = st.text_input("Full Name *")
-    cust_mobile = st.text_input("Mobile Number *")
-    cust_city = st.selectbox("City *", ["Sahiwal", "Lahore", "Karachi", "Islamabad", "Faisalabad", "Multan"])
-    cust_address = st.text_area("Complete Residential Address *")
+    st.markdown("### 👤 Step 1: Provide Delivery Information / Apni Details Likhein")
+    cust_name = st.text_input("Full Name / Aap Ka Poora Naam *")
+    cust_mobile = st.text_input("Mobile Number / Phone Number *")
+    cust_city = st.selectbox("City / Shehar *", ["Sahiwal", "Lahore", "Karachi", "Islamabad", "Faisalabad", "Multan"])
+    cust_address = st.text_area("Complete Residential Address / Ghar Ka Poora Pata *")
     
-    st.markdown("### 📝 Step 2: Write Your Medicine Requirements")
-    written_order = st.text_area("List your required medicines & amounts *:", placeholder="Example:\nPanadol 500mg - 2 Packs\nAugmentin 625mg - 1 Strip")
-    instructions = st.text_input("Special Instructions (Optional)", placeholder="e.g. Please deliver after 5:00 PM")
+    st.markdown("### 📝 Step 2: Write Your Medicine Requirements / Dawaion Ki List")
+    written_order = st.text_area("List your required medicines & amounts / Apni dawaai aur tonaad (quantity) likhein *:", placeholder="Example:\nPanadol 500mg - 2 Packs\nAugmentin 625mg - 1 Strip")
+    instructions = st.text_input("Special Instructions / Koi zaroori baat (Optional)", placeholder="e.g. Please deliver after 5:00 PM / Shaam 5 baje ke baad bhejein")
     
-    if st.button("🚀 Submit Written Order", type="primary"):
+    if st.button("🚀 Submit Written Order / Order Bhejein", type="primary"):
         if not cust_name or not cust_mobile or not cust_address or not written_order:
-            st.error("⚠️ Verification Failed! Ensure details and medicine requirement script are filled.")
+            st.error("⚠️ Verification Failed! Ensure details and medicine requirement script are filled. / Meherbani karke saari zaroori details poori likhein.")
         else:
             o_id = str(uuid.uuid4())[:8].upper()
             full_details = f"Order Script:\n{written_order}\n\nInstructions: {instructions}"
             save_order(o_id, cust_name, cust_mobile, cust_address, cust_city, "Manual Written Script", full_details, None)
-            st.success(f"🎉 Hand-written custom order successfully filed as Order ID: #{o_id}")
+            st.success(f"🎉 Hand-written custom order successfully filed! Your Order tracking ID is: **#{o_id}** (Isko note kar lein status check karne ke liye).")
+            st.info(f"*(Aap ka order chalagya hai! Aap ka tracking Number **#{o_id}** hai, isay apne paas likh lein).*")
 
 # 3. UPLOAD PRESCRIPTION
 elif st.session_state.current_page == "Upload Prescription":
-    st.markdown("## 📋 Upload Doctor Prescription")
+    st.markdown("## 📋 Upload Doctor Prescription / Parchi Upload Karein")
     st.write("Upload a photo or PDF of your doctor's handwritten slip. Our pharmacist will read it and call you.")
+    st.write("*(Doctor ki parchi ya slip ki photo ya PDF upload karein. Hamare pharmacist parchi parh kar aap ko phone karenge).*")
     
-    st.markdown("### 👤 Patient & Delivery Details")
-    p_name = st.text_input("Full Patient Name *")
-    p_mobile = st.text_input("Mobile Number *")
-    p_city = st.selectbox("City Delivery Destination *", ["Sahiwal", "Lahore", "Karachi", "Islamabad", "Faisalabad", "Multan"])
-    p_address = st.text_area("Complete Address *")
+    st.markdown("### 👤 Patient & Delivery Details / Mareez Aur Delivery Ki Details")
+    p_name = st.text_input("Full Patient Name / Mareez Ka Naam *")
+    p_mobile = st.text_input("Mobile Number / Phone Number *")
+    p_city = st.selectbox("City Delivery Destination / Shehar *", ["Sahiwal", "Lahore", "Karachi", "Islamabad", "Faisalabad", "Multan"], key="p_city_select")
+    p_address = st.text_area("Complete Address / Pata *", key="p_address_text")
     
-    uploaded_file = st.file_uploader("Choose Prescription File (Image/PDF) *", type=["png", "jpg", "jpeg", "pdf"])
-    p_notes = st.text_area("Additional Notes (Optional)")
+    uploaded_file = st.file_uploader("Choose Prescription File (Image/PDF) / Parchi ki Photo ya PDF chunein *", type=["png", "jpg", "jpeg", "pdf"])
+    p_notes = st.text_area("Additional Notes / Koi aur baat (Optional)")
     
-    if st.button("📤 Upload and Dispatch Order", type="primary"):
+    if st.button("📤 Upload and Dispatch Order / Parchi Bhejein", type="primary"):
         if not p_name or not p_mobile or not p_address or not uploaded_file:
-            st.error("⚠️ Ensure patient details and prescription file are uploaded.")
+            st.error("⚠️ Ensure patient details and prescription file are uploaded. / Parchi ki file aur details upload karna zaroori hai.")
         else:
             o_id = str(uuid.uuid4())[:8].upper()
             file_ext = os.path.splitext(uploaded_file.name).lower()
@@ -136,13 +150,14 @@ elif st.session_state.current_page == "Upload Prescription":
                 f.write(uploaded_file.getbuffer())
                 
             save_order(o_id, p_name, p_mobile, p_address, p_city, "Prescription Upload", f"Notes: {p_notes}", saved_filename)
-            st.success(f"✅ Prescription submitted. Assigned ID: #{o_id}")
+            st.success(f"✅ Prescription submitted perfectly! Your tracking reference Token ID is: **#{o_id}**")
+            st.info(f"*(Parchi successfully bhej di gayi hai. Aap ka Token ID: **#{o_id}** hai).*")
 # 4. DIGITAL CLINIC (Rs.300)
 elif st.session_state.current_page == "Digital Clinic (Rs.300)":
-    st.markdown("## 👨‍⚕️ Remote Doctor Consultation Portal")
-    st.info("💰 **Consultation Fee: Rs. 300**")
+    st.markdown("## 👨‍⚕️ Remote Doctor Consultation Portal / Online Clinic")
+    st.info("💰 **Consultation Fee: Rs. 300 / Doctor Ki Fees: 300 Rupee**")
     
-    st.markdown("#### 💳 Step 1: Send Fee to Babar Aziz (JazzCash/EasyPaisa)")
+    st.markdown("#### 💳 Step 1: Send Fee to Babar Aziz (JazzCash/EasyPaisa) / Fees Is Number Par Bhejein")
     st.markdown("""
     <div class="payment-box">
         <p style="margin:0; font-weight:bold; color:#15803d;">📱 JazzCash & EasyPaisa Number</p>
@@ -151,19 +166,19 @@ elif st.session_state.current_page == "Digital Clinic (Rs.300)":
     </div>
     """, unsafe_allow_html=True)
     
-    st.markdown("#### 📝 Step 2: Fill Case Profile & Upload Proof")
-    pat_name = st.text_input("Patient Full Name *")
-    pat_mob = st.text_input("Mobile / Contact Info *")
-    symptoms_text = st.text_area("Describe Symptoms / Current Problems *", placeholder="Fever for last 2 days...")
+    st.markdown("#### 📝 Step 2: Fill Case Profile & Upload Proof / Details Aur ScreenShot Bhejein")
+    pat_name = st.text_input("Patient Full Name / Mareez Ka Poora Naam *")
+    pat_mob = st.text_input("Mobile / Contact Info / Phone Number *")
+    symptoms_text = st.text_area("Describe Symptoms / Bemari Ki Details Likhein *", placeholder="e.g. Fever for last 2 days / Do din se bukhar hai...")
     
-    st.markdown("##### 📱 Mobile Voice Feature & Assets Manager")
-    voice_note = st.file_uploader("🎤 Send Voice Note / Audio Recording", type=["mp3", "wav", "m4a", "ogg"])
-    med_report = st.file_uploader("📎 Upload Medical Report", type=["pdf", "png", "jpg", "jpeg"])
-    pay_ss = st.file_uploader("💵 Upload Payment Receipt Screenshot *", type=["png", "jpg", "jpeg"])
+    st.markdown("##### 📱 Mobile Voice Feature & Assets Manager / Voice Note Ya Reports")
+    voice_note = st.file_uploader("🎤 Send Voice Note / Apni Awaaz Mein Record Karke Bhejein", type=["mp3", "wav", "m4a", "ogg"])
+    med_report = st.file_uploader("📎 Upload Medical Report / Test Ki Report Upload Karein", type=["pdf", "png", "jpg", "jpeg"])
+    pay_ss = st.file_uploader("💵 Upload Payment Receipt Screenshot / Fees Ka ScreenShot Bhejein *", type=["png", "jpg", "jpeg"])
     
-    if st.button("Submit Case to Doctor Panel", type="primary"):
+    if st.button("Submit Case to Doctor Panel / Doctor Ko Bhejein", type="primary"):
         if not pat_name or not pat_mob or not symptoms_text or not pay_ss:
-            st.error("⚠️ You must provide identity, symptoms, and payment screenshot.")
+            st.error("⚠️ You must provide identity, symptoms, and payment screenshot. / Naam, bemari ki details aur fees ka screenshot lazmi hai.")
         else:
             c_id = "CON-" + str(uuid.uuid4())[:6].upper()
             
@@ -187,12 +202,63 @@ elif st.session_state.current_page == "Digital Clinic (Rs.300)":
                     f.write(voice_note.getbuffer())
                     
             save_consultation(c_id, pat_name, pat_mob, ss_path, symptoms_text, f_path, v_path)
-            st.success(f"🚀 Consultation Registered perfectly. Tracking ID: {c_id}") 
-            st.info("Medical team will check the payment receipt and activate your chat dashboard via phone/SMS shortly.")
+            st.success(f"🚀 Consultation Registered perfectly! Track using ID: **{c_id}**") 
+            st.info(f"*(Doctor ki clinic me aap ka case submit hogya hai. Tracking ID **{c_id}** hai. Fees verify hote hi doctor reply yahan bhej denge).*")
 
-# 5. SECRET ALONE ADMIN DASHBOARD
+# 5. USER ORDER HISTORY & TRACKING PORTAL
+elif st.session_state.current_page == "Track My Order":
+    st.markdown("## 🔍 Personal Order History & Status Tracker / Order Check Karein")
+    st.write("Apne order ka status (Pending, Preparing, Delivered) dekhne ke liye apna Mobile Number ya Order ID darj karein:")
+    st.write("*(Apna order check karne ke liye apna Phone Number ya Order ID likhein):*")
+    
+    search_input = st.text_input("Enter Mobile Number or Order ID / Phone ya ID Likhein:")
+    
+    if search_input:
+        conn = get_connection()
+        user_orders = conn.execute("SELECT * FROM orders WHERE mobile = ? OR order_id = ? ORDER BY timestamp DESC", (search_input, search_input.upper())).fetchall()
+        user_consults = conn.execute("SELECT * FROM consultations WHERE mobile = ? OR consultation_id = ? ORDER BY timestamp DESC", (search_input, search_input.upper())).fetchall()
+        conn.close()
+        
+        st.markdown("### 📦 Aap Ke Medicine Orders / Dawaion Ke Orders:")
+        if user_orders:
+            for row in user_orders:
+                status_class = f"status-{row['status'].lower()}"
+                st.markdown(f"""
+                <div style="border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 10px; background-color: #fafafa;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <b>Order ID: #{row['order_id']}</b>
+                        <span class="status-badge {status_class}">{row['status']}</span>
+                    </div>
+                    <p style="margin: 5px 0; font-size: 0.9rem; color: #555;"><b>Date / Tareekh:</b> {row['timestamp']}</p>
+                    <p style="margin: 5px 0; font-size: 0.9rem; color: #333;"><b>Order Items / Dawaai:</b><br>{row['order_details']}</p>
+                </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.info("Is number/ID se koi medicine order nahi mila. / Is number par koi order nahi mila.")
+        st.markdown("### 🩺 Aap Ki Doctor Consultations / Doctor Se Baat Cheet:")
+        if user_consults:
+            for row in user_consults:
+                status_class = f"status-confirmed" if row['status'] == "Approved" else "status-pending"
+                st.markdown(f"""
+                <div style="border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 10px; background-color: #fafafa;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <b>Consultation ID: {row['consultation_id']}</b>
+                        <span class="status-badge {status_class}">{row['status']}</span>
+                    </div>
+                    <p style="margin: 5px 0; font-size: 0.9rem; color: #555;"><b>Date / Tareekh:</b> {row['timestamp']}</p>
+                    <p style="margin: 5px 0; font-size: 0.9rem; color: #333;"><b>Your Symptoms / Bemari:</b> {row['symptoms']}</p>
+                    <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 10px; margin-top: 10px; border-radius: 4px;">
+                        <b style="color: #15803d;">👨‍⚕️ Doctor Reply / Doctor Ka Jawab:</b><br>
+                        {row['doctor_reply'] if row['doctor_reply'] else 'Babar Aziz sahib aap ki payment check karke jald doctor ka jawab yahan share karenge. Thoda intezar farmayein.'}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.info("Is number/ID se koi consultation booking nahi mili. / Is number par koi consultation nahi mili.")
+
+# 6. SECRET ALONE ADMIN DASHBOARD
 elif st.session_state.current_page == "Secret Admin Dashboard":
-    st.markdown("## 🔐 Strategic Operational Dashboard")
+    st.markdown("## 🔐 Strategic Operational Dashboard (Admin Panel)")
     
     if not st.session_state.admin_logged_in:
         admin_pass = st.text_input("Input Secure Dashboard Password", type="password")
@@ -201,7 +267,7 @@ elif st.session_state.current_page == "Secret Admin Dashboard":
                 st.session_state.admin_logged_in = True
                 st.rerun()
             else:
-                st.error("Authentication Denied!")
+                st.error("Authentication Denied! / Galat Password.")
                 
     if st.session_state.admin_logged_in:
         st.success("Access Granted. Welcome back Babar & Sabir Aziz.")
@@ -223,7 +289,7 @@ elif st.session_state.current_page == "Secret Admin Dashboard":
                         st.write(f"**Contact:** {row['mobile']} | **Location:** {row['city']}, {row['address']}")
                         st.info(f"**Contents:** {row['order_details']}")
                         
-                        if row['prescription_path'] and os.path.exists(row['prescription_path']):
+                        if row['prescription_path'] and isinstance(row['prescription_path'], str) and os.path.exists(row['prescription_path']):
                             if row['prescription_path'].lower().endswith('.pdf'):
                                 with open(row['prescription_path'], "rb") as f:
                                     st.download_button("📥 Download PDF Prescription", f.read(), file_name=os.path.basename(row['prescription_path']), key=f"dl_{row['order_id']}")
@@ -253,21 +319,21 @@ elif st.session_state.current_page == "Secret Admin Dashboard":
                         st.write(f"**Contact:** {row['mobile']}")
                         st.warning(f"**Symptoms:** {row['symptoms']}")
                         
-                        if row['payment_screenshot'] and os.path.exists(row['payment_screenshot']):
+                        if row['payment_screenshot'] and isinstance(row['payment_screenshot'], str) and os.path.exists(row['payment_screenshot']):
                             if row['payment_screenshot'].lower().endswith('.pdf'):
                                 with open(row['payment_screenshot'], "rb") as f:
                                     st.download_button("📥 Download Payment PDF", f.read(), file_name=os.path.basename(row['payment_screenshot']), key=f"dl_pay_{row['consultation_id']}")
                             else:
                                 st.image(row['payment_screenshot'], width=250)
                         
-                        if row['file_path'] and os.path.exists(row['file_path']):
+                        if row['file_path'] and isinstance(row['file_path'], str) and os.path.exists(row['file_path']):
                             if row['file_path'].lower().endswith('.pdf'):
                                 with open(row['file_path'], "rb") as f:
                                     st.download_button("📥 Download Medical Report PDF", f.read(), file_name=os.path.basename(row['file_path']), key=f"dl_rep_{row['consultation_id']}")
                             else:
                                 st.image(row['file_path'], width=250)
                                 
-                        if row['voice_path'] and os.path.exists(row['voice_path']):
+                        if row['voice_path'] and isinstance(row['voice_path'], str) and os.path.exists(row['voice_path']):
                             st.write("🎤 Patient Voice Recording:")
                             st.audio(row['voice_path'])
                             
