@@ -177,17 +177,21 @@ elif st.session_state.current_page == "Digital Clinic (Rs.300)":
     pay_ss = st.file_uploader("💵 Upload Payment Receipt Screenshot / Fees Ka ScreenShot Bhejein *", type=["png", "jpg", "jpeg"])
     
     if st.button("Submit Case to Doctor Panel / Doctor Ko Bhejein", type="primary"):
-        if not pat_name or not pat_mob or not symptoms_text or not pay_ss:
-            st.error("⚠️ You must provide identity, symptoms, and payment screenshot. / Naam, bemari ki details aur fees ka screenshot lazmi hai.")
-        else:
-            c_id = "CON-" + str(uuid.uuid4())[:6].upper()
-            
-            file_ext_ss = os.path.splitext(pay_ss.name).lower()
-            ss_path = f"uploads/payments/{c_id}_payment{file_ext_ss}"
-            with open(ss_path, "wb") as f: 
-                f.write(pay_ss.getbuffer())
-                
-            f_path = None
+        # Yahan check karein ke pay_ss ke paas 'name' attribute hai ya nahi
+if not pat_name or not pat_mob or not symptoms_text or not pay_ss or not hasattr(pay_ss, 'name'):
+    st.error("⚠️ You must provide identity, symptoms, and payment screenshot. / Naam, bemari ki details aur fees ka screenshot lazmi hai.")
+else:
+    c_id = "CON-" + str(uuid.uuid4())[:6].upper()
+    
+    # Ab pay_ss.name safe hai aur error nahi dega
+    file_ext_ss = os.path.splitext(pay_ss.name)[1].lower() # [1] lagaya taake sirf '.png' ya '.jpg' mile
+    ss_path = f"uploads/payments/{c_id}_payment{file_ext_ss}"
+    
+    with open(ss_path, "wb") as f: 
+        f.write(pay_ss.getbuffer())
+        
+    f_path = None
+
             if med_report:
                 file_ext_rep = os.path.splitext(med_report.name).lower()
                 f_path = f"uploads/consultations/{c_id}_report{file_ext_rep}"
