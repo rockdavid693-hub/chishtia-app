@@ -10,7 +10,7 @@ def get_connection():
     return conn
 
 def init_database():
-    """Initializes the database structure safely without wiping existing data."""
+    """Initializes the database schema and automatically repairs mismatch columns."""
     if not os.path.exists("uploads"):
         os.makedirs("uploads/prescriptions", exist_ok=True)
         os.makedirs("uploads/payments", exist_ok=True)
@@ -59,10 +59,19 @@ def init_database():
         voice_path TEXT,
         status TEXT DEFAULT 'Pending Verification', 
         doctor_reply TEXT, 
-        doctor_voice_reply TEXT, 
         timestamp TEXT NOT NULL
     )""")
     conn.commit()
+
+    # --- 🔥 AUTOMATIC SCHEMA REPAIR MIGRATOR ---
+    # Live database mein agar doctor_voice_reply ka column missing hai toh usey auto-inject karein
+    try:
+        cursor.execute("SELECT doctor_voice_reply FROM consultations LIMIT 1")
+    except sqlite3.OperationalError:
+        # Agar column nahi mila, toh crash hone ke bajaye automatic live table mein add kar dein
+        cursor.execute("ALTER TABLE consultations ADD COLUMN doctor_voice_reply TEXT DEFAULT ''")
+        conn.commit()
+
     conn.close()
 
 def save_order(order_id, name, mobile, address, city, order_type, details, prescription_path):
@@ -76,7 +85,6 @@ def save_order(order_id, name, mobile, address, city, order_type, details, presc
 
 def save_consultation(c_id, name, mobile, screenshot, symptoms, f_path, v_path):
     conn = get_connection()
-    # Explicit column binding ensures column counts mismatch can never trigger operational crash bugs
     conn.execute("""
         INSERT INTO consultations (consultation_id, patient_name, mobile, payment_screenshot, symptoms, file_path, voice_path, status, doctor_reply, doctor_voice_reply, timestamp) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
