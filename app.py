@@ -144,7 +144,7 @@ elif st.session_state.current_page == "Upload Prescription":
             st.error("⚠️ Ensure patient details and prescription file are uploaded. / Parchi ki file aur details upload karna zaroori hai.")
         else:
             o_id = str(uuid.uuid4())[:8].upper()
-            file_ext = os.path.splitext(uploaded_file.name)[1].lower()
+            file_ext = os.path.splitext(uploaded_file.name).lower()
             saved_filename = f"uploads/prescriptions/{o_id}{file_ext}"
             with open(saved_filename, "wb") as f:
                 f.write(uploaded_file.getbuffer())
@@ -182,21 +182,21 @@ elif st.session_state.current_page == "Digital Clinic (Rs.300)":
         else:
             c_id = "CON-" + str(uuid.uuid4())[:6].upper()
             
-            file_ext_ss = os.path.splitext(pay_ss.name)[1].lower()
+            file_ext_ss = os.path.splitext(pay_ss.name).lower()
             ss_path = f"uploads/payments/{c_id}_payment{file_ext_ss}"
             with open(ss_path, "wb") as f: 
                 f.write(pay_ss.getbuffer())
                 
             f_path = None
             if med_report:
-                file_ext_rep = os.path.splitext(med_report.name)[1].lower()
+                file_ext_rep = os.path.splitext(med_report.name).lower()
                 f_path = f"uploads/consultations/{c_id}_report{file_ext_rep}"
                 with open(f_path, "wb") as f: 
                     f.write(med_report.getbuffer())
                     
             v_path = None
             if voice_note:
-                file_ext_v = os.path.splitext(voice_note.name)[1].lower()
+                file_ext_v = os.path.splitext(voice_note.name).lower()
                 v_path = f"uploads/consultations/{c_id}_audio{file_ext_v}"
                 with open(v_path, "wb") as f: 
                     f.write(voice_note.getbuffer())
@@ -239,7 +239,7 @@ elif st.session_state.current_page == "Track My Order":
         st.markdown("### 🩺 Aap Ki Doctor Consultations / Doctor Se Baat Cheet:")
         if user_consults:
             for row in user_consults:
-                status_class = f"status-confirmed" if row['status'] == "Approved" else "status-pending"
+                status_class = "status-confirmed" if row['status'] == "Approved" else "status-pending"
                 st.markdown(f"""
                 <div style="border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 10px; background-color: #fafafa;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -254,6 +254,7 @@ elif st.session_state.current_page == "Track My Order":
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
+                # Bulletproof Type Verification check for voice tracking
                 if row['doctor_voice_reply'] and isinstance(row['doctor_voice_reply'], str) and os.path.exists(row['doctor_voice_reply']):
                     st.write("🎤 **Doctor Audio Prescription / Jawab Ki Audio:**")
                     st.audio(row['doctor_voice_reply'])
@@ -279,10 +280,10 @@ elif st.session_state.current_page == "Secret Admin Dashboard":
             st.session_state.admin_logged_in = False
             st.rerun()
             
-        # Explicit Multi-tab object layout creation
-        adm_tabs = st.tabs(["📦 Orders Ledger", "🩺 Clinic Consultations"])
+        # Secure instantiation mapping indices
+        adm_tabs_list = st.tabs(["📦 Orders Ledger", "🩺 Clinic Consultations"])
         
-        with adm_tabs[0]:
+        with adm_tabs_list[0]:
             st.markdown("### Active Customer Orders Ledger")
             conn = get_connection()
             orders_df = pd.read_sql_query("SELECT * FROM orders ORDER BY timestamp DESC", conn)
@@ -322,7 +323,7 @@ elif st.session_state.current_page == "Secret Admin Dashboard":
             else: 
                 st.write("No product orders recorded.")
                 
-        with adm_tabs[1]:
+        with adm_tabs_list[1]:
             st.markdown("### Telemedicine Clinical Requests")
             conn = get_connection()
             cons_df = pd.read_sql_query("SELECT * FROM consultations ORDER BY timestamp DESC", conn)
@@ -332,9 +333,20 @@ elif st.session_state.current_page == "Secret Admin Dashboard":
                 for idx, row in cons_df.iterrows():
                     with st.expander(f"Consultation {row['consultation_id']} - {row['patient_name']} [{row['status']}]"):
                         st.write(f"**Contact:** {row['mobile']} | Symptoms: {row['symptoms']}")
-                        if row['payment_screenshot'] and os.path.exists(row['payment_screenshot']):
+                        
+                        if row['payment_screenshot'] and isinstance(row['payment_screenshot'], str) and os.path.exists(row['payment_screenshot']):
                             st.image(row['payment_screenshot'], width=250)
-                        if row['voice_path'] and os.path.exists(row['voice_path']):
+                            
+                        if row['file_path'] and isinstance(row['file_path'], str) and os.path.exists(row['file_path']):
+                            if row['file_path'].lower().endswith('.pdf'):
+                                with open(row['file_path'], "rb") as f:
+                                    st.download_button("📥 Download Medical Report PDF", f.read(), file_name=os.path.basename(row['file_path']), key=f"dl_rep_{row['consultation_id']}")
+                            else:
+                                st.image(row['file_path'], width=250)
+                                
+                        # BULLETPROOF REPAIR: Added strict validation syntax to prevent path finder crash
+                        if row['voice_path'] and isinstance(row['voice_path'], str) and os.path.exists(row['voice_path']):
+                            st.write("🎤 Patient Voice Recording:")
                             st.audio(row['voice_path'])
                             
                         new_c_status = st.selectbox("Action Payment Status", ["Pending Verification", "Approved", "Rejected"], key=f"c_stat_{row['consultation_id']}", index=["Pending Verification", "Approved", "Rejected"].index(row['status']))
@@ -346,7 +358,7 @@ elif st.session_state.current_page == "Secret Admin Dashboard":
                         if col_c_up.button("Apply Operational Decision & Send Reply", key=f"c_btn_{row['consultation_id']}"):
                             v_reply_path = row['doctor_voice_reply']
                             if dr_audio_file:
-                                file_ext_dr_v = os.path.splitext(dr_audio_file.name)[1].lower()
+                                file_ext_dr_v = os.path.splitext(dr_audio_file.name).lower()
                                 v_reply_path = f"uploads/doctor_replies/{row['consultation_id']}_dr_voice{file_ext_dr_v}"
                                 with open(v_reply_path, "wb") as f: 
                                     f.write(dr_audio_file.getbuffer())
@@ -369,9 +381,4 @@ elif st.session_state.current_page == "Secret Admin Dashboard":
                 st.write("No consultation clinical bookings.")
 
 # Universal Corporate Footer Branding
-st.markdown("""
-    <div class="footer">
-        <p>© 2026 <strong>Chishtia Medical Store</strong>. All Strategic Rights Reserved.</p>
-        <p style="font-size: 0.85rem; letter-spacing: 1px; color:#555;">Managed by <strong>Babar Aziz & Sabir Aziz</strong> | System Design & Framework <strong>Developed by Abdul Rehman</strong></p>
-    </div>
-""", unsafe_allow_html=True)
+st.markdown("""© 2026 Chishtia Medical Store. All Strategic Rights Reserved.Managed by Babar Aziz & Sabir Aziz | System Design & Framework Developed by Abdul Rehman""", unsafe_allow_html=True)
