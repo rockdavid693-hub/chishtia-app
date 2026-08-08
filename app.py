@@ -65,7 +65,7 @@ st.markdown("""
 
 # URL Check for Secret Admin Gateway (?page=admin)
 query_params = st.query_params
-is_admin_url = query_params.get("page") == "admin" or query_params.get("page", [""])[0] == "admin"
+is_admin_url = "page" in query_params and query_params["page"] == "admin"
 
 if is_admin_url:
     st.session_state.current_page = "Secret Admin Dashboard"
@@ -210,7 +210,58 @@ elif st.session_state.current_page == "Track My Order":
     st.markdown("## 🔍 Personal Order History & Status Tracker / Order Check Karein")
     st.write("Apne order ka status (Pending, Preparing, Delivered) dekhne ke liye apna Mobile Number ya Order ID darj karein:")
     
-    elif st.session_state.current_page == "Secret Admin Dashboard":
+    search_input = st.text_input("Enter Mobile Number or Order ID / Phone ya ID Likhein:")
+    
+    if search_input:
+        clean_input = search_input.strip().replace("#", "").upper()
+        
+        conn = get_connection()
+        user_orders = conn.execute("SELECT * FROM orders WHERE mobile = ? OR order_id = ? ORDER BY timestamp DESC", (search_input, clean_input)).fetchall()
+        user_consults = conn.execute("SELECT * FROM consultations WHERE mobile = ? OR consultation_id = ? ORDER BY timestamp DESC", (search_input, clean_input)).fetchall()
+        conn.close()
+        
+        st.markdown("### 📦 Aap Ke Medicine Orders / Dawaion Ke Orders:")
+        if user_orders:
+            for row in user_orders:
+                status_class = f"status-{row['status'].lower()}"
+                st.markdown(f"""
+                <div style="border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 10px; background-color: #fafafa;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <b>Order ID: #{row['order_id']}</b>
+                        <span class="status-badge {status_class}">{row['status']}</span>
+                    </div>
+                    <p style="margin: 5px 0; font-size: 0.9rem; color: #555;"><b>Date / Tareekh:</b> {row['timestamp']}</p>
+                    <p style="margin: 5px 0; font-size: 0.9rem; color: #333;"><b>Order Items / Dawaai:</b><br>{row['order_details']}</p>
+                </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.info("Is number/ID se koi medicine order nahi mila. / Is number par koi order nahi mila.")
+        st.markdown("### 🩺 Aap Ki Doctor Consultations / Doctor Se Baat Cheet:")
+        if user_consults:
+            for row in user_consults:
+                status_class = f"status-confirmed" if row['status'] == "Approved" else "status-pending"
+                st.markdown(f"""
+                <div style="border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 10px; background-color: #fafafa;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <b>Consultation ID: {row['consultation_id']}</b>
+                        <span class="status-badge {status_class}">{row['status']}</span>
+                    </div>
+                    <p style="margin: 5px 0; font-size: 0.9rem; color: #555;"><b>Date / Tareekh:</b> {row['timestamp']}</p>
+                    <p style="margin: 5px 0; font-size: 0.9rem; color: #333;"><b>Your Symptoms / Bemari:</b> {row['symptoms']}</p>
+                    <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 10px; margin-top: 10px; border-radius: 4px;">
+                        <b style="color: #15803d;">👨‍⚕️ Doctor Reply / Doctor Ka Jawab:</b><br>
+                        {row['doctor_reply'] if row['doctor_reply'] else 'Babar Aziz sahib aap ki payment check karke jald doctor ka jawab yahan share karenge. Thoda intezar farmayein.'}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+                if row['doctor_voice_reply'] and isinstance(row['doctor_voice_reply'], str) and os.path.exists(row['doctor_voice_reply']):
+                    st.write("🎤 **Doctor Audio Prescription / Jawab Ki Audio:**")
+                    st.audio(row['doctor_voice_reply'])
+        else:
+            st.info("Is number/ID se koi consultation booking nahi mili. / Is number par koi consultation nahi mili.")
+
+# 6. SECRET ALONE ADMIN DASHBOARD
+elif st.session_state.current_page == "Secret Admin Dashboard":
     st.markdown("## 🔐 Strategic Operational Dashboard (Admin Panel)")
     
     if not st.session_state.admin_logged_in:
@@ -228,10 +279,9 @@ elif st.session_state.current_page == "Track My Order":
             st.session_state.admin_logged_in = False
             st.rerun()
             
-        # Multi-tab setup
+        # Explicit Multi-tab object layout creation
         adm_tabs = st.tabs(["📦 Orders Ledger", "🩺 Clinic Consultations"])
         
-        # 1. Orders Tab
         with adm_tabs[0]:
             st.markdown("### Active Customer Orders Ledger")
             conn = get_connection()
@@ -244,7 +294,6 @@ elif st.session_state.current_page == "Track My Order":
                         st.write(f"**Contact:** {row['mobile']} | **Location:** {row['city']}, {row['address']}")
                         st.info(f"**Contents:** {row['order_details']}")
                         
-                        # Safe Type check to prevent crash on None values
                         if row['prescription_path'] and isinstance(row['prescription_path'], str) and os.path.exists(row['prescription_path']):
                             if row['prescription_path'].lower().endswith('.pdf'):
                                 with open(row['prescription_path'], "rb") as f:
@@ -273,7 +322,6 @@ elif st.session_state.current_page == "Track My Order":
             else: 
                 st.write("No product orders recorded.")
                 
-        # 2. Telemedicine Tab
         with adm_tabs[1]:
             st.markdown("### Telemedicine Clinical Requests")
             conn = get_connection()
@@ -284,22 +332,9 @@ elif st.session_state.current_page == "Track My Order":
                 for idx, row in cons_df.iterrows():
                     with st.expander(f"Consultation {row['consultation_id']} - {row['patient_name']} [{row['status']}]"):
                         st.write(f"**Contact:** {row['mobile']} | Symptoms: {row['symptoms']}")
-                        
-                        # Safe screenshot validation check
-                        if row['payment_screenshot'] and isinstance(row['payment_screenshot'], str) and os.path.exists(row['payment_screenshot']):
+                        if row['payment_screenshot'] and os.path.exists(row['payment_screenshot']):
                             st.image(row['payment_screenshot'], width=250)
-                            
-                        # Safe Medical Report check
-                        if row['file_path'] and isinstance(row['file_path'], str) and os.path.exists(row['file_path']):
-                            if row['file_path'].lower().endswith('.pdf'):
-                                with open(row['file_path'], "rb") as f:
-                                    st.download_button("📥 Download Medical Report PDF", f.read(), file_name=os.path.basename(row['file_path']), key=f"dl_rep_{row['consultation_id']}")
-                            else:
-                                st.image(row['file_path'], width=250)
-                                
-                        # BUG FIX: Added strict type verification to prevent GenericPath None error
-                        if row['voice_path'] and isinstance(row['voice_path'], str) and os.path.exists(row['voice_path']):
-                            st.write("🎤 Patient Voice Recording:")
+                        if row['voice_path'] and os.path.exists(row['voice_path']):
                             st.audio(row['voice_path'])
                             
                         new_c_status = st.selectbox("Action Payment Status", ["Pending Verification", "Approved", "Rejected"], key=f"c_stat_{row['consultation_id']}", index=["Pending Verification", "Approved", "Rejected"].index(row['status']))
@@ -311,7 +346,7 @@ elif st.session_state.current_page == "Track My Order":
                         if col_c_up.button("Apply Operational Decision & Send Reply", key=f"c_btn_{row['consultation_id']}"):
                             v_reply_path = row['doctor_voice_reply']
                             if dr_audio_file:
-                                file_ext_dr_v = os.path.splitext(dr_audio_file.name).lower()
+                                file_ext_dr_v = os.path.splitext(dr_audio_file.name)[1].lower()
                                 v_reply_path = f"uploads/doctor_replies/{row['consultation_id']}_dr_voice{file_ext_dr_v}"
                                 with open(v_reply_path, "wb") as f: 
                                     f.write(dr_audio_file.getbuffer())
