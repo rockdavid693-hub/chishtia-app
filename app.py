@@ -94,6 +94,7 @@ if st.session_state.current_page == "Home Pharmacy":
     st.markdown("### 🌟 Welcome to Chishtia Medical Store / KhushAamdeed")
     st.write("Aap ghar baithe asani se apni medicines ka order likh kar bhej sakte hain ya doctor ki parchi (prescription) upload kar sakte hain. Apna order track karne ke liye 'Track My Order' par click karein.")
     st.write("*(Aap ghar baithe aasaani se apni dawaion ka order likh kar bhejin ya doctor ki parchi upload karein. Apna order check karne ke liye Track My Order button dabayein).*")
+    
     st.markdown("---")
     st.markdown("### 💡 Daily Health Tip / Sehat Ki Baat")
     st.info("💡 **Stay Hydrated!** Drinking 8-10 glasses of water daily helps flush toxins out of your kidneys and improves your overall metabolic health.\n\n*(Rozana 8 se 10 glass paani peene se gurde saaf rehte hain aur sehat behtar hoti hai).*")
@@ -120,7 +121,7 @@ elif st.session_state.current_page == "Order Medicines":
             o_id = str(uuid.uuid4())[:8].upper()
             full_details = f"Order Script:\n{written_order}\n\nInstructions: {instructions}"
             save_order(o_id, cust_name, cust_mobile, cust_address, cust_city, "Manual Written Script", full_details, None)
-            st.success(f"🎉 Hand-written custom order successfully filed! Your Order tracking ID is: **#{o_id}** (Isko note kar lein status check karne ke liye).")
+            st.success(f"🎉 Hand-written custom order successfully filed! Your Order tracking ID is: **#{o_id}**")
             st.info(f"*(Aap ka order chalagya hai! Aap ka tracking Number **#{o_id}** hai, isay apne paas likh lein).*")
 
 # 3. UPLOAD PRESCRIPTION SECTION
@@ -143,7 +144,8 @@ elif st.session_state.current_page == "Upload Prescription":
             st.error("⚠️ Ensure patient details and prescription file are uploaded. / Parchi ki file aur details upload karna zaroori hai.")
         else:
             o_id = str(uuid.uuid4())[:8].upper()
-            file_ext = os.path.splitext(uploaded_file.name).lower()
+            # SAFE BUG FIX FOR EXTENSION EXTRACTION
+            file_ext = os.path.splitext(uploaded_file.name)[1].lower()
             saved_filename = f"uploads/prescriptions/{o_id}{file_ext}"
             with open(saved_filename, "wb") as f:
                 f.write(uploaded_file.getbuffer())
@@ -181,21 +183,22 @@ elif st.session_state.current_page == "Digital Clinic (Rs.300)":
         else:
             c_id = "CON-" + str(uuid.uuid4())[:6].upper()
             
-            file_ext_ss = os.path.splitext(pay_ss.name).lower()
+            # SAFE BUG FIX FOR EXTRACTION FORMATS (.png, .jpg, etc.)
+            file_ext_ss = os.path.splitext(pay_ss.name)[1].lower()
             ss_path = f"uploads/payments/{c_id}_payment{file_ext_ss}"
             with open(ss_path, "wb") as f: 
                 f.write(pay_ss.getbuffer())
                 
             f_path = None
             if med_report:
-                file_ext_rep = os.path.splitext(med_report.name).lower()
+                file_ext_rep = os.path.splitext(med_report.name)[1].lower()
                 f_path = f"uploads/consultations/{c_id}_report{file_ext_rep}"
                 with open(f_path, "wb") as f: 
                     f.write(med_report.getbuffer())
                     
             v_path = None
             if voice_note:
-                file_ext_v = os.path.splitext(voice_note.name).lower()
+                file_ext_v = os.path.splitext(voice_note.name)[1].lower()
                 v_path = f"uploads/consultations/{c_id}_audio{file_ext_v}"
                 with open(v_path, "wb") as f: 
                     f.write(voice_note.getbuffer())
@@ -204,7 +207,7 @@ elif st.session_state.current_page == "Digital Clinic (Rs.300)":
             st.success(f"🚀 Consultation Registered perfectly! Track using ID: **{c_id}**") 
             st.info(f"*(Doctor ki clinic me aap ka case submit hogya hai. Tracking ID **{c_id}** hai. Fees verify hote hi doctor reply yahan bhej denge).*")
 
-# 5. USER ORDER HISTORY & TRACKING PORTAL
+# 5. USER ORDER HISTORY & TRACKING PORTAL (SHOWING DATE AND TIME)
 elif st.session_state.current_page == "Track My Order":
     st.markdown("## 🔍 Personal Order History & Status Tracker / Order Check Karein")
     st.write("Apne order ka status (Pending, Preparing, Delivered) dekhne ke liye apna Mobile Number ya Order ID darj karein:")
@@ -229,7 +232,7 @@ elif st.session_state.current_page == "Track My Order":
                         <b>Order ID: #{row['order_id']}</b>
                         <span class="status-badge {status_class}">{row['status']}</span>
                     </div>
-                    <p style="margin: 5px 0; font-size: 0.9rem; color: #555;"><b>Date / Tareekh:</b> {row['timestamp']}</p>
+                    <p style="margin: 5px 0; font-size: 0.9rem; color: #e65100;">🕒 <b>Booking Date & Time / Order Ka Waqt:</b> {row['timestamp']}</p>
                     <p style="margin: 5px 0; font-size: 0.9rem; color: #333;"><b>Order Items / Dawaai:</b><br>{row['order_details']}</p>
                 </div>
                 """, unsafe_allow_html=True)
@@ -245,7 +248,7 @@ elif st.session_state.current_page == "Track My Order":
                         <b>Consultation ID: {row['consultation_id']}</b>
                         <span class="status-badge {status_class}">{row['status']}</span>
                     </div>
-                    <p style="margin: 5px 0; font-size: 0.9rem; color: #555;"><b>Date / Tareekh:</b> {row['timestamp']}</p>
+                    <p style="margin: 5px 0; font-size: 0.9rem; color: #0369a1;">🕒 <b>Consultation Date & Time / Case Ka Waqt:</b> {row['timestamp']}</p>
                     <p style="margin: 5px 0; font-size: 0.9rem; color: #333;"><b>Your Symptoms / Bemari:</b> {row['symptoms']}</p>
                     <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 10px; margin-top: 10px; border-radius: 4px;">
                         <b style="color: #15803d;">👨‍⚕️ Doctor Reply / Doctor Ka Jawab:</b><br>
@@ -278,6 +281,7 @@ elif st.session_state.current_page == "Secret Admin Dashboard":
             st.session_state.admin_logged_in = False
             st.rerun()
             
+        # Secure instantiation mapping indices
         adm_tabs_list = st.tabs(["📦 Orders Ledger", "🩺 Clinic Consultations"])
         
         with adm_tabs_list[0]:
@@ -290,6 +294,7 @@ elif st.session_state.current_page == "Secret Admin Dashboard":
                 for index, row in orders_df.iterrows():
                     with st.expander(f"Order {row['order_id']} - {row['customer_name']} [{row['status']}]"):
                         st.write(f"**Contact:** {row['mobile']} | **Location:** {row['city']}, {row['address']}")
+                        st.write(f"🕒 **Booked At:** {row['timestamp']}")
                         st.info(f"**Contents:** {row['order_details']}")
                         
                         if row['prescription_path'] and isinstance(row['prescription_path'], str) and os.path.exists(row['prescription_path']):
@@ -330,6 +335,7 @@ elif st.session_state.current_page == "Secret Admin Dashboard":
                 for idx, row in cons_df.iterrows():
                     with st.expander(f"Consultation {row['consultation_id']} - {row['patient_name']} [{row['status']}]"):
                         st.write(f"**Contact:** {row['mobile']} | Symptoms: {row['symptoms']}")
+                        st.write(f"🕒 **Submitted At:** {row['timestamp']}")
                         if row['payment_screenshot'] and os.path.exists(row['payment_screenshot']):
                             st.image(row['payment_screenshot'], width=250)
                         
@@ -353,7 +359,7 @@ elif st.session_state.current_page == "Secret Admin Dashboard":
                         if col_c_up.button("Apply Operational Decision & Send Reply", key=f"c_btn_{row['consultation_id']}"):
                             v_reply_path = row['doctor_voice_reply']
                             if dr_audio_file:
-                                file_ext_dr_v = os.path.splitext(dr_audio_file.name).lower()
+                                file_ext_dr_v = os.path.splitext(dr_audio_file.name)[1].lower()
                                 v_reply_path = f"uploads/doctor_replies/{row['consultation_id']}_dr_voice{file_ext_dr_v}"
                                 with open(v_reply_path, "wb") as f: 
                                     f.write(dr_audio_file.getbuffer())
@@ -382,3 +388,4 @@ st.markdown("""
         <p style="font-size: 0.85rem; letter-spacing: 1px; color:#555;">Managed by <strong>Babar Aziz & Sabir Aziz</strong> | System Design & Framework <strong>Developed by Abdul Rehman</strong></p>
     </div>
 """, unsafe_allow_html=True)
+hts Reserved.Managed by Babar Aziz & Sabir Aziz | System Design & Framework Developed by Abdul Rehman""", unsafe_allow_html=True)
