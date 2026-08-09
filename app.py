@@ -387,5 +387,4 @@ st.markdown("""
         <p>© 2026 <strong>Chishtia Medical Store</strong>. All Strategic Rights Reserved.</p>
         <p style="font-size: 0.85rem; letter-spacing: 1px; color:#555;">Managed by <strong>Babar Aziz & Sabir Aziz</strong> | System Design & Framework <strong>Developed by Abdul Rehman</strong></p>
     </div>
-""", unsafe_allow_html=True)
 hts Reserved.Managed by Babar Aziz & Sabir Aziz | System Design & Framework Developed by Abdul Rehman""", unsafe_allow_html=True)
