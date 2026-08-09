@@ -172,22 +172,16 @@ elif st.session_state.current_page == "Digital Clinic (Rs.300)":
     symptoms_text = st.text_area("Describe Symptoms / Bemari Ki Details Likhein *", placeholder="e.g. Fever for last 2 days / Do din se bukhar hai...")
     
     st.markdown("##### 📱 Mobile Voice Feature & Assets Manager / Voice Note Ya Reports")
-    voice_note = st.file_uploader("🎤 Send Voice Note / Apni Awaaz Mein Record Karke Bhejein", type=["mp3", "wav", "m4a", "ogg"])
+        voice_note = st.file_uploader("🎤 Send Voice Note / Apni Awaaz Mein Record Karke Bhejein", type=["mp3", "wav", "m4a", "ogg"])
     med_report = st.file_uploader("📎 Upload Medical Report / Test Ki Report Upload Karein", type=["pdf", "png", "jpg", "jpeg"])
     pay_ss = st.file_uploader("💵 Upload Payment Receipt Screenshot / Fees Ka ScreenShot Bhejein *", type=["png", "jpg", "jpeg"])
     
-    
-           if st.button("Submit Case to Doctor Panel / Doctor Ko Bhejein", type="primary"):
+    if st.button("Submit Case to Doctor Panel / Doctor Ko Bhejein", type="primary"):
         if not pat_name or not pat_mob or not symptoms_text or not pay_ss:
             st.error("⚠️ You must provide identity, symptoms, and payment screenshot. / Naam, bemari ki details aur fees ka screenshot lazmi hai.")
         else:
             c_id = "CON-" + str(uuid.uuid4())[:6].upper()
 
-            
-            file_ext_ss = os.path.splitext(pay_ss.name).lower()
-            ss_path = f"uploads/payments/{c_id}_payment{file_ext_ss}"
-            
-            with open(ss_path, "wb") as f: 
                 f.write(pay_ss.getbuffer())
                 
             f_path = None
