@@ -1,6 +1,6 @@
 import sqlite3
 import os
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 DATABASE_FILE = "chishtia_healthcare.db"
 
@@ -8,6 +8,12 @@ def get_connection():
     conn = sqlite3.connect(DATABASE_FILE, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     return conn
+
+def get_pakistan_time():
+    """Returns the current precise date and time forced inside Pakistan Standard Time (PKT)."""
+    # Pakistan is exactly GMT+5 hours ahead of universal server time
+    pkt_zone = timezone(timedelta(hours=5))
+    return datetime.now(pkt_zone).strftime("%Y-%m-%d %I:%M:%S %p")
 
 def init_database():
     """Initializes the database schema and automatically repairs mismatch columns."""
@@ -63,12 +69,10 @@ def init_database():
     )""")
     conn.commit()
 
-    # --- 🔥 AUTOMATIC SCHEMA REPAIR MIGRATOR ---
-    # Live database mein agar doctor_voice_reply ka column missing hai toh usey auto-inject karein
+    # --- AUTOMATIC SCHEMA REPAIR MIGRATOR ---
     try:
         cursor.execute("SELECT doctor_voice_reply FROM consultations LIMIT 1")
     except sqlite3.OperationalError:
-        # Agar column nahi mila, toh crash hone ke bajaye automatic live table mein add kar dein
         cursor.execute("ALTER TABLE consultations ADD COLUMN doctor_voice_reply TEXT DEFAULT ''")
         conn.commit()
 
@@ -79,7 +83,7 @@ def save_order(order_id, name, mobile, address, city, order_type, details, presc
     conn.execute("""
         INSERT INTO orders (order_id, customer_name, mobile, address, city, order_type, order_details, prescription_path, status, timestamp) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (order_id, name, mobile, address, city, order_type, details, prescription_path, 'Pending', datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+    """, (order_id, name, mobile, address, city, order_type, details, prescription_path, 'Pending', get_pakistan_time()))
     conn.commit()
     conn.close()
 
@@ -88,6 +92,6 @@ def save_consultation(c_id, name, mobile, screenshot, symptoms, f_path, v_path):
     conn.execute("""
         INSERT INTO consultations (consultation_id, patient_name, mobile, payment_screenshot, symptoms, file_path, voice_path, status, doctor_reply, doctor_voice_reply, timestamp) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (c_id, name, mobile, screenshot, symptoms, f_path, v_path, 'Pending Verification', '', '', datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+    """, (c_id, name, mobile, screenshot, symptoms, f_path, v_path, 'Pending Verification', '', '', get_pakistan_time()))
     conn.commit()
     conn.close()
