@@ -89,16 +89,15 @@ else:
     st.markdown(f"**Current Section / Aap is page par hain:** `{st.session_state.current_page}`")
     st.markdown("---")
 
-# 1. HOME PHARMACY
+# 1. HOME PHARMACY SECTION
 if st.session_state.current_page == "Home Pharmacy":
     st.markdown("### 🌟 Welcome to Chishtia Medical Store / KhushAamdeed")
     st.write("Aap ghar baithe asani se apni medicines ka order likh kar bhej sakte hain ya doctor ki parchi (prescription) upload kar sakte hain. Apna order track karne ke liye 'Track My Order' par click karein.")
     st.write("*(Aap ghar baithe aasaani se apni dawaion ka order likh kar bhejin ya doctor ki parchi upload karein. Apna order check karne ke liye Track My Order button dabayein).*")
-    
     st.markdown("---")
     st.markdown("### 💡 Daily Health Tip / Sehat Ki Baat")
     st.info("💡 **Stay Hydrated!** Drinking 8-10 glasses of water daily helps flush toxins out of your kidneys and improves your overall metabolic health.\n\n*(Rozana 8 se 10 glass paani peene se gurde saaf rehte hain aur sehat behtar hoti hai).*")
-# 2. ORDER MEDICINES (Direct Manual Written Order Only)
+# 2. ORDER MEDICINES SECTION
 elif st.session_state.current_page == "Order Medicines":
     st.markdown("## 🛒 Medicine Ordering System / Dawaai Ka Order")
     st.write("Apni matlooba medicines ki list niche box mein likhein aur apni details darj karke order submit karein.")
@@ -124,7 +123,7 @@ elif st.session_state.current_page == "Order Medicines":
             st.success(f"🎉 Hand-written custom order successfully filed! Your Order tracking ID is: **#{o_id}** (Isko note kar lein status check karne ke liye).")
             st.info(f"*(Aap ka order chalagya hai! Aap ka tracking Number **#{o_id}** hai, isay apne paas likh lein).*")
 
-# 3. UPLOAD PRESCRIPTION
+# 3. UPLOAD PRESCRIPTION SECTION
 elif st.session_state.current_page == "Upload Prescription":
     st.markdown("## 📋 Upload Doctor Prescription / Parchi Upload Karein")
     st.write("Upload a photo or PDF of your doctor's handwritten slip. Our pharmacist will read it and call you.")
@@ -152,7 +151,7 @@ elif st.session_state.current_page == "Upload Prescription":
             save_order(o_id, p_name, p_mobile, p_address, p_city, "Prescription Upload", f"Notes: {p_notes}", saved_filename)
             st.success(f"✅ Prescription submitted perfectly! Your tracking reference Token ID is: **#{o_id}**")
             st.info(f"*(Parchi successfully bhej di gayi hai. Aap ka Token ID: **#{o_id}** hai).*")
-# 4. DIGITAL CLINIC (Rs.300)
+# 4. DIGITAL CLINIC SECTION (Rs.300)
 elif st.session_state.current_page == "Digital Clinic (Rs.300)":
     st.markdown("## 👨‍⚕️ Remote Doctor Consultation Portal / Online Clinic")
     st.info("💰 **Consultation Fee: Rs. 300 / Doctor Ki Fees: 300 Rupee**")
@@ -172,24 +171,25 @@ elif st.session_state.current_page == "Digital Clinic (Rs.300)":
     symptoms_text = st.text_area("Describe Symptoms / Bemari Ki Details Likhein *", placeholder="e.g. Fever for last 2 days / Do din se bukhar hai...")
     
     st.markdown("##### 📱 Mobile Voice Feature & Assets Manager / Voice Note Ya Reports")
-        voice_note = st.file_uploader("🎤 Send Voice Note / Apni Awaaz Mein Record Karke Bhejein", type=["mp3", "wav", "m4a", "ogg"])
+    voice_note = st.file_uploader("🎤 Send Voice Note / Apni Awaaz Mein Record Karke Bhejein", type=["mp3", "wav", "m4a", "ogg"])
     med_report = st.file_uploader("📎 Upload Medical Report / Test Ki Report Upload Karein", type=["pdf", "png", "jpg", "jpeg"])
     pay_ss = st.file_uploader("💵 Upload Payment Receipt Screenshot / Fees Ka ScreenShot Bhejein *", type=["png", "jpg", "jpeg"])
     
-    if st.button("Submit Case to Doctor Panel / Doctor Ko Bhejein", type="primary"):
+    if st.button("Submit Case to Doctor Panel / Doctor Ko Bhejein", key="btn_submit_consultation", type="primary"):
         if not pat_name or not pat_mob or not symptoms_text or not pay_ss:
             st.error("⚠️ You must provide identity, symptoms, and payment screenshot. / Naam, bemari ki details aur fees ka screenshot lazmi hai.")
         else:
             c_id = "CON-" + str(uuid.uuid4())[:6].upper()
-
+            
+            file_ext_ss = os.path.splitext(pay_ss.name).lower()
+            ss_path = f"uploads/payments/{c_id}_payment{file_ext_ss}"
+            with open(ss_path, "wb") as f: 
                 f.write(pay_ss.getbuffer())
                 
             f_path = None
-            
             if med_report:
-                # Aapka medical report handle karne ka code yahan aayega
-                pass
-
+                file_ext_rep = os.path.splitext(med_report.name).lower()
+                f_path = f"uploads/consultations/{c_id}_report{file_ext_rep}"
                 with open(f_path, "wb") as f: 
                     f.write(med_report.getbuffer())
                     
@@ -204,7 +204,7 @@ elif st.session_state.current_page == "Digital Clinic (Rs.300)":
             st.success(f"🚀 Consultation Registered perfectly! Track using ID: **{c_id}**") 
             st.info(f"*(Doctor ki clinic me aap ka case submit hogya hai. Tracking ID **{c_id}** hai. Fees verify hote hi doctor reply yahan bhej denge).*")
 
-# 5. USER ORDER HISTORY & TRACKING PORTAL (SMART AUTO-CLEAN LOGIC)
+# 5. USER ORDER HISTORY & TRACKING PORTAL
 elif st.session_state.current_page == "Track My Order":
     st.markdown("## 🔍 Personal Order History & Status Tracker / Order Check Karein")
     st.write("Apne order ka status (Pending, Preparing, Delivered) dekhne ke liye apna Mobile Number ya Order ID darj karein:")
@@ -253,7 +253,6 @@ elif st.session_state.current_page == "Track My Order":
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
-                # Bulletproof Type Verification check for voice tracking
                 if row['doctor_voice_reply'] and isinstance(row['doctor_voice_reply'], str) and os.path.exists(row['doctor_voice_reply']):
                     st.write("🎤 **Doctor Audio Prescription / Jawab Ki Audio:**")
                     st.audio(row['doctor_voice_reply'])
@@ -266,7 +265,7 @@ elif st.session_state.current_page == "Secret Admin Dashboard":
     
     if not st.session_state.admin_logged_in:
         admin_pass = st.text_input("Input Secure Dashboard Password", type="password")
-        if st.button("Verify Authentication"):
+        if st.button("Verify Authentication", key="btn_verify_admin"):
             if admin_pass == "chishtia786":
                 st.session_state.admin_logged_in = True
                 st.rerun()
@@ -275,11 +274,10 @@ elif st.session_state.current_page == "Secret Admin Dashboard":
                 
     if st.session_state.admin_logged_in:
         st.success("Access Granted. Welcome back Babar & Sabir Aziz.")
-        if st.button("🚪 Logout Admin Session"):
+        if st.button("🚪 Logout Admin Session", key="btn_logout_admin"):
             st.session_state.admin_logged_in = False
             st.rerun()
             
-        # Secure instantiation mapping indices
         adm_tabs_list = st.tabs(["📦 Orders Ledger", "🩺 Clinic Consultations"])
         
         with adm_tabs_list[0]:
@@ -332,10 +330,9 @@ elif st.session_state.current_page == "Secret Admin Dashboard":
                 for idx, row in cons_df.iterrows():
                     with st.expander(f"Consultation {row['consultation_id']} - {row['patient_name']} [{row['status']}]"):
                         st.write(f"**Contact:** {row['mobile']} | Symptoms: {row['symptoms']}")
-                        
-                        if row['payment_screenshot'] and isinstance(row['payment_screenshot'], str) and os.path.exists(row['payment_screenshot']):
+                        if row['payment_screenshot'] and os.path.exists(row['payment_screenshot']):
                             st.image(row['payment_screenshot'], width=250)
-                            
+                        
                         if row['file_path'] and isinstance(row['file_path'], str) and os.path.exists(row['file_path']):
                             if row['file_path'].lower().endswith('.pdf'):
                                 with open(row['file_path'], "rb") as f:
@@ -343,7 +340,6 @@ elif st.session_state.current_page == "Secret Admin Dashboard":
                             else:
                                 st.image(row['file_path'], width=250)
                                 
-                        # BULLETPROOF REPAIR: Added strict validation syntax to prevent path finder crash
                         if row['voice_path'] and isinstance(row['voice_path'], str) and os.path.exists(row['voice_path']):
                             st.write("🎤 Patient Voice Recording:")
                             st.audio(row['voice_path'])
@@ -380,4 +376,8 @@ elif st.session_state.current_page == "Secret Admin Dashboard":
                 st.write("No consultation clinical bookings.")
 
 # Universal Corporate Footer Branding
-st.markdown("""© 2026 Chishtia Medical Store. All Strategic Rights Reserved.Managed by Babar Aziz & Sabir Aziz | System Design & Framework Developed by Abdul Rehman""", unsafe_allow_html=True)
+st.markdown("""
+    <div class="footer">
+        <p>© 2026 <strong>Chishtia Medical Store</strong>. All Strategic Rights Reserved.</p>
+        Managed by Babar Aziz & Sabir Aziz | System Design & Framework Developed by Abdul Rehman""", unsafe_allow_html=True)
+Managed by Babar Aziz & Sabir Aziz | System Design & Framework Developed by Abdul Rehman""", unsafe_allow_html=True)
